@@ -10,3 +10,7 @@ export const opening = 'Opening...🔓';
 export const failedToOpen = 'Failed to open the gate⚠️';
 
 export const help = 'Try using /open to open the gate, or /check_authorization to check if you are allowed to open the gate';
+
+export const alreadyAllowed = 'You are already allowed to open the gate!🥳🎉';
+
+export const accessDenied = 'Your access to this bot has been denied⛔🙅🏻';

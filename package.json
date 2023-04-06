@@ -17,6 +17,7 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "env-var": "^7.3.0",
+    "lowdb": "^5.1.0",
     "telegraf": "^4.12.2"
   },
   "devDependencies": {
