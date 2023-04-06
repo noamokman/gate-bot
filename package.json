@@ -1,0 +1,37 @@
+{
+  "name": "gate-bot",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .ts --fix",
+    "build": "tsc",
+    "start": "nodemon"
+  },
+  "keywords": [],
+  "author": "Noam Okman <noamokman@gmail.com> (https://github.com/noamokman)",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "env-var": "^7.3.0",
+    "telegraf": "^4.12.2"
+  },
+  "devDependencies": {
+    "@osskit/eslint-config": "^1.0.19",
+    "@osskit/prettier-config": "^0.0.1",
+    "@osskit/tsconfig": "^0.0.6",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.37.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-unicorn": "^46.0.0",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.3"
+  }
+}
