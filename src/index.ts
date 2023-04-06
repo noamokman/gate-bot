@@ -14,7 +14,7 @@ bot.start((ctx) => {
   const userId = ctx.from.id.toString();
 
   if (!authorize(userId)) {
-    return ctx.reply(`${welcome}\n${notAllowed(userId)}`);
+    return ctx.reply(`${welcome}\n${notAllowed}`);
   }
 
   return ctx.reply(`${welcome}\nTry using /open to open the gate`);
@@ -25,7 +25,7 @@ bot.command('check_authorization', async (ctx) => {
   const userId = ctx.from.id.toString();
 
   if (!authorize(userId)) {
-    return ctx.reply(notAllowed(userId));
+    return ctx.reply(notAllowed);
   }
 
   return ctx.reply(allowed);
@@ -123,7 +123,7 @@ bot.command('open', async (ctx) => {
   const userId = ctx.from.id.toString();
 
   if (!authorize(userId)) {
-    return ctx.reply(notAllowed(userId));
+    return ctx.reply(notAllowed);
   }
 
   try {
