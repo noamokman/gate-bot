@@ -103,7 +103,7 @@ bot.action(/deny_(.*)/, async (ctx) => {
     adminUserIds
       .filter((id) => id !== issuingUserId)
       .map((adminUserId) =>
-        ctx.telegram.sendMessage(adminUserId, `User ${userId} was denied access to open the gate by ${ctx.from?.first_name}}`),
+        ctx.telegram.sendMessage(adminUserId, `User ${userId} was denied access to open the gate by ${ctx.from?.first_name}`),
       ),
   );
 
