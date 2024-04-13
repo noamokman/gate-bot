@@ -2,10 +2,10 @@ import 'dotenv/config.js';
 import { Telegraf, Markup } from 'telegraf';
 // eslint-disable-next-line import/extensions
 import { message } from 'telegraf/filters';
-import { adminUserIds, botToken } from './framework/environment.js';
+import { adminUserIds, botToken, doorCode } from './framework/environment.js';
 import { open } from './services/open.js';
 import { authorize } from './services/authorize.js';
-import { allowed, failedToOpen, help, notAllowed, opening, welcome, alreadyAllowed, accessDenied } from './services/messages.js';
+import { allowed, failedToOpen, help, notAllowed, opening, welcome, alreadyAllowed, accessDenied, getDoorCode } from './services/messages.js';
 import { addAllowedUser } from './services/db.js';
 
 const bot = new Telegraf(botToken);
@@ -68,7 +68,7 @@ bot.action(/allow_(.*)/, async (ctx) => {
     adminUserIds
       .filter((id) => id !== issuingUserId)
       .map((adminUserId) =>
-        ctx.telegram.sendMessage(adminUserId, `User ${userId} was allowed to open the gate by ${ctx.from?.first_name}}`),
+        ctx.telegram.sendMessage(adminUserId, `User ${userId} was allowed to open the gate by ${ctx.from?.first_name}`),
       ),
   );
 
@@ -139,12 +139,29 @@ bot.command('open', async (ctx) => {
   return ctx.reply(opening);
 });
 
+
+
+bot.command('door_code', async (ctx) => {
+  const userId = ctx.from.id.toString();
+
+  if (!authorize(userId)) {
+    return ctx.reply(notAllowed);
+  }
+
+  if (!doorCode) {
+    return ctx.reply('Door code is not set');
+  }
+
+  return ctx.reply(getDoorCode(doorCode));
+});
+
 bot.on(message(), (ctx) => ctx.reply(help));
 
 await bot.telegram.setMyCommands([
   { command: 'open', description: 'Open the gate' },
   { command: 'check_authorization', description: 'Check if you are allowed to open the gate' },
   { command: 'request_access', description: 'Request access to open the gate' },
+  { command: 'door_code', description: 'Get the door code' },
 ]);
 
 process.once('SIGINT', () => {
