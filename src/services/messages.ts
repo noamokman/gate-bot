@@ -15,3 +15,5 @@ export const help =
 export const alreadyAllowed = 'You are already allowed to open the gate!🥳🎉';
 
 export const accessDenied = 'Your access to this bot has been denied⛔🙅🏻';
+
+export const getDoorCode = (code: string) => `The door code is 🔢\n${code}`;
