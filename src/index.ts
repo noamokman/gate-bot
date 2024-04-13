@@ -68,7 +68,7 @@ bot.action(/allow_(.*)/, async (ctx) => {
     adminUserIds
       .filter((id) => id !== issuingUserId)
       .map((adminUserId) =>
-        ctx.telegram.sendMessage(adminUserId, `User ${userId} was allowed to open the gate by ${ctx.from?.first_name}}`),
+        ctx.telegram.sendMessage(adminUserId, `User ${userId} was allowed to open the gate by ${ctx.from?.first_name}`),
       ),
   );
 
