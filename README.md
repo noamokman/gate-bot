@@ -13,20 +13,21 @@ This is a Telegram bot that allows authorized users to open a gate. It uses the 
 ### Docker compose
 
 ```yml
-version: '3.9'
+version: '3.8'
+
 services:
   gate-bot:
     image: noamokman/gate-bot
-    volumes:
-      - .:/service
-    ports:
-      - 3000:3000
+    container_name: gate-bot
     environment:
-      - BOT_TOKEN=${BOT_TOKEN}
-      - ADMIN_USER_IDS=${ADMIN_USER_IDS}
-      - DOOR_CODE=${DOOR_CODE}
-      - GATE_URL=${GATE_URL}
-      - DB_PATH=${DB_PATH}
+      DB_PATH: /config/db.json
+      BOT_TOKEN: ${BOT_TOKEN}
+      ADMIN_USER_IDS: ${ADMIN_USER_IDS}
+      GATE_URL: ${GATE_URL}
+      DOOR_CODE: ${DOOR_CODE}
+    volumes:
+      - ./config/:/config
+    restart: unless-stopped
 ```
 
 ### Manual
