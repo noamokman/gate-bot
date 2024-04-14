@@ -159,9 +159,9 @@ bot.on(message(), (ctx) => ctx.reply(help));
 
 await bot.telegram.setMyCommands([
   { command: 'open', description: 'Open the gate' },
+  { command: 'door_code', description: 'Get the door code' },
   { command: 'check_authorization', description: 'Check if you are allowed to open the gate' },
   { command: 'request_access', description: 'Request access to open the gate' },
-  { command: 'door_code', description: 'Get the door code' },
 ]);
 
 process.once('SIGINT', () => {
