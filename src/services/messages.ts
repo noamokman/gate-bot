@@ -3,7 +3,7 @@ import { doorCode } from '../framework/environment.js';
 export const welcome = 'Welcome to the gate!👋🏻';
 
 export const notAllowed =
-  'Looks like you are not an allowed user⛔🙅🏻\nTo request access, use /request_access\nTo check if you are have been approved, use /check_authorization';
+  'Looks like you are not an allowed user⛔🙅🏻\nTo request access, use /request_access\nTo check if you have been approved, use /check_authorization';
 
 export const allowed = 'You are allowed to open the gate!🥳🎉';
 
