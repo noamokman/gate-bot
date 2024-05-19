@@ -8,7 +8,7 @@ const db = new Low(adapter);
 
 await db.read();
 
-export const isAllowedUser = (userId: string) => db.data?.allowedUserIds?.includes(userId);
+export const isAllowedUser = (userId: string) => !!db.data?.allowedUserIds?.includes(userId);
 
 export const addAllowedUser = (userId: string) => {
   if (!db.data?.allowedUserIds) {

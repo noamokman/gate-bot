@@ -1,165 +1,37 @@
 import 'dotenv/config.js';
-import { Telegraf, Markup } from 'telegraf';
+import type { Context } from 'telegraf';
+import { Telegraf } from 'telegraf';
 // eslint-disable-next-line import/extensions
 import { message } from 'telegraf/filters';
-import { adminUserIds, botToken, doorCode } from './framework/environment.js';
-import { open } from './services/open.js';
-import { authorize } from './services/authorize.js';
-import { allowed, failedToOpen, help, notAllowed, opening, welcome, alreadyAllowed, accessDenied, getDoorCode } from './services/messages.js';
-import { addAllowedUser } from './services/db.js';
+import { botToken, doorCode } from './framework/environment.js';
+import { authorizeContext } from './services/authorize.js';
+import { allowed, helpAllowed, notAllowed, welcome } from './services/messages.js';
+import { openCommand } from './commands/open.js';
+import { requestAccessCommand } from './commands/requestAccess.js';
+import { doorCodeCommand } from './commands/doorCode.js';
+import { checkAuthorizationCommand } from './commands/checkAuthorization.js';
+import { allowAction } from './actions/allow.js';
+import { denyAction } from './actions/deny.js';
 
 const bot = new Telegraf(botToken);
 
-bot.start((ctx) => {
-  const userId = ctx.from.id.toString();
+bot.start((ctx) => ctx.reply(`${welcome}\n${!authorizeContext(ctx) ? notAllowed : `${allowed}\n${helpAllowed}`}`));
 
-  if (!authorize(userId)) {
-    return ctx.reply(`${welcome}\n${notAllowed}`);
-  }
+const helpHandler = (ctx: Context) => ctx.reply(!authorizeContext(ctx) ? notAllowed : helpAllowed);
 
-  return ctx.reply(`${welcome}\nTry using /open to open the gate`);
-});
-bot.help((ctx) => ctx.reply(help));
+checkAuthorizationCommand(bot);
+requestAccessCommand(bot);
+allowAction(bot);
+denyAction(bot);
+doorCodeCommand(bot);
+openCommand(bot);
 
-bot.command('check_authorization', async (ctx) => {
-  const userId = ctx.from.id.toString();
-
-  if (!authorize(userId)) {
-    return ctx.reply(notAllowed);
-  }
-
-  return ctx.reply(allowed);
-});
-
-bot.command('request_access', async (ctx) => {
-  const userId = ctx.from.id.toString();
-
-  if (authorize(userId)) {
-    return ctx.reply(alreadyAllowed);
-  }
-
-  await Promise.all(
-    adminUserIds.map((adminUserId) =>
-      ctx.telegram.sendMessage(
-        adminUserId,
-        `Request recieved\nusername: ${ctx.from.username}\nFull name: ${ctx.from.first_name} ${ctx.from.last_name}\nId: ${userId}`,
-        Markup.inlineKeyboard([Markup.button.callback('Allow✅', `allow_${userId}`), Markup.button.callback('Deny⛔', `deny_${userId}`)]),
-      ),
-    ),
-  );
-
-  return ctx.reply('Request sent!📨');
-});
-
-bot.action(/allow_(.*)/, async (ctx) => {
-  const issuingUserId = ctx.from?.id.toString();
-
-  if (!issuingUserId || !adminUserIds.includes(issuingUserId)) {
-    return ctx.reply('You are not allowed to do this');
-  }
-
-  const userId = ctx.match?.[1];
-
-  if (!userId) {
-    return ctx.reply('Something went wrong');
-  }
-
-  await Promise.all(
-    adminUserIds
-      .filter((id) => id !== issuingUserId)
-      .map((adminUserId) =>
-        ctx.telegram.sendMessage(adminUserId, `User ${userId} was allowed to open the gate by ${ctx.from?.first_name}`),
-      ),
-  );
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-
-  if (ctx.callbackQuery.message && 'text' in ctx.callbackQuery.message) {
-    await ctx.editMessageText(`${ctx.callbackQuery.message.text}\nApproved`);
-  }
-
-  await ctx.telegram.sendMessage(userId, allowed);
-
-  await addAllowedUser(userId);
-
-  return ctx.answerCbQuery('User was allowed to open the gate');
-});
-
-bot.action(/deny_(.*)/, async (ctx) => {
-  const issuingUserId = ctx.from?.id.toString();
-
-  if (!issuingUserId || !adminUserIds.includes(issuingUserId)) {
-    return ctx.reply('You are not allowed to do this');
-  }
-
-  const userId = ctx.match?.[1];
-
-  if (!userId) {
-    return ctx.reply('Something went wrong');
-  }
-
-  await Promise.all(
-    adminUserIds
-      .filter((id) => id !== issuingUserId)
-      .map((adminUserId) =>
-        ctx.telegram.sendMessage(adminUserId, `User ${userId} was denied access to open the gate by ${ctx.from?.first_name}`),
-      ),
-  );
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-
-  if (ctx.callbackQuery.message && 'text' in ctx.callbackQuery.message) {
-    await ctx.editMessageText(`${ctx.callbackQuery.message.text}\nDenied`);
-  }
-
-  await ctx.telegram.sendMessage(userId, accessDenied);
-
-  return ctx.answerCbQuery('User was denied access to open the gate');
-});
-
-bot.command('open', async (ctx) => {
-  const userId = ctx.from.id.toString();
-
-  if (!authorize(userId)) {
-    return ctx.reply(notAllowed);
-  }
-
-  try {
-    await open();
-  } catch (error) {
-    if (error instanceof Error) {
-      return ctx.reply(`${failedToOpen}\n${error.message}`);
-    }
-
-    return ctx.reply(failedToOpen);
-  }
-
-  return ctx.reply(opening);
-});
-
-
-
-bot.command('door_code', async (ctx) => {
-  const userId = ctx.from.id.toString();
-
-  if (!authorize(userId)) {
-    return ctx.reply(notAllowed);
-  }
-
-  if (!doorCode) {
-    return ctx.reply('Door code is not set');
-  }
-
-  return ctx.reply(getDoorCode(doorCode));
-});
-
-bot.on(message(), (ctx) => ctx.reply(help));
+bot.help(helpHandler);
+bot.on(message(), helpHandler);
 
 await bot.telegram.setMyCommands([
   { command: 'open', description: 'Open the gate' },
-  { command: 'door_code', description: 'Get the door code' },
+  ...(doorCode ? [{ command: 'door_code', description: 'Get the door code' }] : []),
   { command: 'check_authorization', description: 'Check if you are allowed to open the gate' },
   { command: 'request_access', description: 'Request access to open the gate' },
 ]);
