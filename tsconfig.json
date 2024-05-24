@@ -1,8 +1,6 @@
 {
   "extends": "@osskit/tsconfig",
   "compilerOptions": {
-    "module": "node16",
-    "moduleResolution": "node16",
     "outDir": "dist"
   },
   "include": ["src/**/*"]

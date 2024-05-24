@@ -4,7 +4,7 @@ import { JSONFile } from 'lowdb/node';
 import { dbPath } from '../framework/environment.js';
 
 const adapter = new JSONFile<{ allowedUserIds?: string[] }>(dbPath);
-const db = new Low(adapter);
+const db = new Low(adapter, { allowedUserIds: [] });
 
 await db.read();
 

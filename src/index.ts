@@ -12,6 +12,7 @@ import { doorCodeCommand } from './commands/doorCode.js';
 import { checkAuthorizationCommand } from './commands/checkAuthorization.js';
 import { allowAction } from './actions/allow.js';
 import { denyAction } from './actions/deny.js';
+import { versionCommand } from './commands/version.js';
 
 const bot = new Telegraf(botToken);
 
@@ -25,6 +26,7 @@ allowAction(bot);
 denyAction(bot);
 doorCodeCommand(bot);
 openCommand(bot);
+versionCommand(bot);
 
 bot.help(helpHandler);
 bot.on(message(), helpHandler);
@@ -34,6 +36,7 @@ await bot.telegram.setMyCommands([
   ...(doorCode ? [{ command: 'door_code', description: 'Get the door code' }] : []),
   { command: 'check_authorization', description: 'Check if you are allowed to open the gate' },
   { command: 'request_access', description: 'Request access to open the gate' },
+  { command: 'version', description: 'Show the current version' },
 ]);
 
 process.once('SIGINT', () => {
