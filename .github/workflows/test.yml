@@ -1,0 +1,28 @@
+name: test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ github.repository }}
+          tags: |
+            type=sha
+            type=raw,value=latest
+
+      - name: get tag
+        id: get-tag
+        run: |
+          TAG=$(echo ${{toJSON(steps.meta.outputs.tags)}} | awk -F: '/sha/{print $2}')
+          echo $TAG
+          echo "::set-output name=tag::$TAG"
