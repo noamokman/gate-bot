@@ -24,7 +24,7 @@ jobs:
       - name: get tag
         id: get-tag
         run: |
-          TAG=$(echo ${{toJSON(steps.meta.outputs.tags)}} | cut -d ":" -f 2 | cut -d "\\" -f 1 )
+          TAG=$(echo ${{toJSON(steps.meta.outputs.tags)}} | cut -d ":" -f 2 | cut -d "\\" -f 1 | tail -1)
           echo $TAG
           echo "::set-output name=tag::$TAG"
 
