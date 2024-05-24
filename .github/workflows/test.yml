@@ -25,6 +25,6 @@ jobs:
         run: |
           TAGS=$(echo ${{ toJSON(steps.meta.outputs.tags) }})
           echo $TAGS        
-          TAG=$(echo "$TAGS" | awk -F: '/sha/{print $2}')
+          TAG=$(echo -e "$TAGS" | awk -F: '/sha/{print $2}')
           echo $TAG
           echo "::set-output name=tag::$TAG"
