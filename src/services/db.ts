@@ -1,5 +1,5 @@
 import { Low } from 'lowdb';
-// eslint-disable-next-line import/extensions
+// eslint-disable-next-line import-x/extensions
 import { JSONFile } from 'lowdb/node';
 import { dbPath } from '../framework/environment.js';
 

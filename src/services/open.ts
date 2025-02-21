@@ -1,13 +1,6 @@
-import { gateUrl } from '../framework/environment.js';
+import { open as httpOpen } from '../services/http.js';
+import { open as mqttOpen } from '../services/mqtt.js';
 
 export const open = async (userId: string) => {
-  const response = await fetch(gateUrl, {
-    method: 'POST',
-    body: JSON.stringify({ userId }),
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to open the gate: ${response.statusText}`);
-  }
+  await Promise.all([httpOpen(userId), mqttOpen()]);
 };
