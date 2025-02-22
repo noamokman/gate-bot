@@ -1,7 +1,7 @@
 import 'dotenv/config.js';
 import type { Context } from 'telegraf';
 import { Telegraf } from 'telegraf';
-// eslint-disable-next-line import/extensions
+// eslint-disable-next-line import-x/extensions
 import { message } from 'telegraf/filters';
 import { botToken, doorCode } from './framework/environment.js';
 import { authorizeContext } from './services/authorize.js';
@@ -13,6 +13,7 @@ import { checkAuthorizationCommand } from './commands/checkAuthorization.js';
 import { allowAction } from './actions/allow.js';
 import { denyAction } from './actions/deny.js';
 import { versionCommand } from './commands/version.js';
+import { initMqtt } from './services/mqtt.js';
 
 const bot = new Telegraf(botToken);
 
@@ -45,5 +46,7 @@ process.once('SIGINT', () => {
 process.once('SIGTERM', () => {
   bot.stop('SIGTERM');
 });
+
+await initMqtt();
 
 await bot.launch();
