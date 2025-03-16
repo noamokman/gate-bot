@@ -95,16 +95,6 @@ Example payload sent to Home Assistant:
 }
 ```
 
-{
-"name": "Gate Bot Button",
-"command_topic": "home/garage/command",
-"payload_press": "open",
-"unique_id": "gate_bot_button",
-"device": { "identifiers": ["gate_bot"], "name": "Gate Bot", "manufacturer": "Custom", "model": "Gate Bot" }
-}
-
-```
-
 ### **Publishing MQTT Commands**
 
 When the bot receives the `/open` command, it publishes an MQTT message to the command topic defined by `MQTT_COMMAND_TOPIC`.
@@ -119,4 +109,3 @@ payload: "open"
 ```
 
 This allows Home Assistant to trigger the gate opening automatically.
-```
