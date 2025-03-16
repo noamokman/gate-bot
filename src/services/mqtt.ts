@@ -11,11 +11,16 @@ const publishDiscovery = () => {
 
   const discoveryPayload = JSON.stringify({
     /* eslint-disable @typescript-eslint/naming-convention */
-    name: 'Gate Bot Switch',
+    name: 'Gate Bot Button',
     command_topic: mqttCommandTopic,
-    payload_on: 'open',
-    unique_id: 'gate_bot_switch',
-    device: { identifiers: ['gate_bot'], name: 'Gate Bot', manufacturer: 'Custom', model: 'Gate Bot' },
+    payload_press: 'open',
+    unique_id: 'gate_bot_button',
+    device: {
+      identifiers: ['gate_bot'],
+      name: 'Gate Bot',
+      manufacturer: 'Custom',
+      model: 'Gate Bot',
+    },
     /* eslint-enable @typescript-eslint/naming-convention */
   });
 
