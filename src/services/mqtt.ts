@@ -18,7 +18,6 @@ const publishDiscovery = () => {
     unique_id: 'gate_bot_event',
     event_types: [eventType],
     state_topic: mqttCommandTopic,
-    value_template: '{{ value_json.event_type }}',
     json_attributes_topic: mqttCommandTopic,
     device: {
       identifiers: ['gate_bot'],
