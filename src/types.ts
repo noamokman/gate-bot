@@ -1,6 +1,6 @@
 export interface UserInfo {
   userId: string;
-  usename: string;
+  usename?: string;
   firstName: string;
-  lastName: string;
+  lastName?: string;
 }
