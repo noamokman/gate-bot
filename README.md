@@ -75,16 +75,22 @@ services:
 
 ### **Home Assistant Discovery**
 
-The bot automatically publishes an MQTT discovery message so Home Assistant can detect it as a switch. The discovery topic is set in the environment variable `MQTT_DISCOVERY_TOPIC`.
+The bot automatically publishes an MQTT discovery message so Home Assistant can detect it as a button. The discovery topic is set in the environment variable `MQTT_DISCOVERY_TOPIC`.
+
+Example MQTT discovery topic:
+
+```
+homeassistant/button/gate_bot_button/config
+```
 
 Example payload sent to Home Assistant:
 
 ```json
 {
-  "name": "Gate Bot Switch",
+  "name": "Gate Bot Button",
   "command_topic": "home/garage/command",
-  "payload_on": "open",
-  "unique_id": "gate_bot_switch",
+  "payload_press": "open",
+  "unique_id": "gate_bot_button",
   "device": { "identifiers": ["gate_bot"], "name": "Gate Bot", "manufacturer": "Custom", "model": "Gate Bot" }
 }
 ```
@@ -96,8 +102,10 @@ When the bot receives the `/open` command, it publishes an MQTT message to the c
 Example message published:
 
 ```
+
 topic: home/garage/command
 payload: "open"
+
 ```
 
 This allows Home Assistant to trigger the gate opening automatically.
