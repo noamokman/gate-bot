@@ -75,23 +75,30 @@ services:
 
 ### **Home Assistant Discovery**
 
-The bot automatically publishes an MQTT discovery message so Home Assistant can detect it as a button. The discovery topic is set in the environment variable `MQTT_DISCOVERY_TOPIC`.
+The bot automatically publishes an MQTT discovery message so Home Assistant can detect it as an event. The discovery topic is set in the environment variable `MQTT_DISCOVERY_TOPIC`.
 
 Example MQTT discovery topic:
 
 ```
-homeassistant/button/gate_bot_button/config
+homeassistant/event/gate_bot_event/config
 ```
 
 Example payload sent to Home Assistant:
 
 ```json
 {
-  "name": "Gate Bot Button",
-  "command_topic": "home/garage/command",
-  "payload_press": "open",
-  "unique_id": "gate_bot_button",
-  "device": { "identifiers": ["gate_bot"], "name": "Gate Bot", "manufacturer": "Custom", "model": "Gate Bot" }
+  "name": "Gate Bot Event",
+  "unique_id": "gate_bot_event",
+  "event_types": ["gate_bot_triggered"],
+  "state_topic": "home/gate_bot/event",
+  "value_template": "{{ value_json.event_type }}",
+  "json_attributes_topic": "home/gate_bot/event",
+  "device": {
+    "identifiers": ["gate_bot"],
+    "name": "Gate Bot",
+    "manufacturer": "Custom",
+    "model": "Gate Bot"
+  }
 }
 ```
 
@@ -102,10 +109,16 @@ When the bot receives the `/open` command, it publishes an MQTT message to the c
 Example message published:
 
 ```
-
-topic: home/garage/command
-payload: "open"
-
+topic: home/gate_bot/event
+payload: {
+  "event_type": "gate_bot_triggered",
+  "source": "telegram_bot",
+  "action": "open_gate",
+  "userInfo": {
+    "id": "123456789",
+    "username": "example_user"
+  }
+}
 ```
 
 This allows Home Assistant to trigger the gate opening automatically.

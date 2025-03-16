@@ -12,7 +12,7 @@ export const openCommand = (bot: Telegraf) => {
     }
 
     try {
-      await open(userId);
+      await open({ userId, usename: ctx.from.username, firstName: ctx.from.first_name, lastName: ctx.from.last_name });
     } catch (error) {
       if (error instanceof Error) {
         return ctx.reply(`${failedToOpen}\n${error.message}`);

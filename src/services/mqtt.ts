@@ -1,6 +1,9 @@
 import type { MqttClient } from 'mqtt';
 import mqtt from 'mqtt';
 import { mqttUrl, mqttDiscoveryTopic, mqttCommandTopic } from '../framework/environment.js';
+import type { UserInfo } from '../types.js';
+
+const eventType = 'gate_bot_triggered';
 
 let client: MqttClient;
 
@@ -11,10 +14,12 @@ const publishDiscovery = () => {
 
   const discoveryPayload = JSON.stringify({
     /* eslint-disable @typescript-eslint/naming-convention */
-    name: 'Gate Bot Button',
-    command_topic: mqttCommandTopic,
-    payload_press: 'open',
-    unique_id: 'gate_bot_button',
+    name: 'Gate Bot Event',
+    unique_id: 'gate_bot_event',
+    event_types: [eventType],
+    state_topic: 'home/gate_bot/event',
+    value_template: '{{ value_json.event_type }}',
+    json_attributes_topic: 'home/gate_bot/event',
     device: {
       identifiers: ['gate_bot'],
       name: 'Gate Bot',
@@ -37,10 +42,18 @@ export const initMqtt = async () => {
   publishDiscovery();
 };
 
-export const open = async () => {
+export const open = async (userInfo: UserInfo) => {
   if (!client || !mqttCommandTopic) {
     return;
   }
 
-  await client.publishAsync(mqttCommandTopic, 'open');
+  const eventPayload = JSON.stringify({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    event_type: eventType,
+    source: 'telegram_bot',
+    action: 'open_gate',
+    userInfo,
+  });
+
+  await client.publishAsync(mqttCommandTopic, eventPayload);
 };
