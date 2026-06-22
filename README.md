@@ -1,17 +1,21 @@
 # gate-bot
 
-This is a Telegram bot that allows authorized users to open a gate. It uses the Telegraf framework for Telegram bot development and supports both HTTP and MQTT for integration with Home Assistant.
+This is a Telegram bot and web UI that allows authorized users to open a gate. It uses the Telegraf framework for Telegram bot development and supports both HTTP and MQTT for integration with Home Assistant.
 
 ## Features
 
 - **Authorization System**: Only authorized users can open the gate.
 - **Request Access**: Users can request access to open the gate. The request is sent to the admins, who can either allow or deny the request.
-- **Open the Gate**: Authorized users can open the gate by sending the `/open` command.
+- **Open the Gate**: Authorized users can open the gate via the `/open` command or the web dashboard.
 - **Check Authorization**: Users can check if they are authorized to open the gate by sending the `/check_authorization` command.
 - **Get the Door Code**: Authorized users can get the door code by sending the `/door_code` command.
 - **Supports Two Modes**:
   - **HTTP Mode**: Calls an HTTP endpoint to open the gate.
   - **MQTT Mode**: Uses MQTT to communicate with Home Assistant.
+- **Web UI**: A built-in web server with Google login for both users and admins.
+  - **User Dashboard**: Open the gate, check status, request access via browser.
+  - **Admin Panel**: Approve/deny access requests and manage users from the web.
+  - Requests from both Telegram and web are visible in a single admin panel.
 
 ## Setup
 
@@ -33,6 +37,14 @@ services:
       MQTT_URL: ${MQTT_URL} # Required for MQTT mode
       MQTT_COMMAND_TOPIC: ${MQTT_COMMAND_TOPIC} # Required for MQTT mode
       MQTT_DISCOVERY_TOPIC: ${MQTT_DISCOVERY_TOPIC} # Required for MQTT mode
+      # Web UI (set WEB_ENABLED=true to enable)
+      WEB_ENABLED: ${WEB_ENABLED}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      WEB_SESSION_SECRET: ${WEB_SESSION_SECRET}
+      WEB_BASE_URL: ${WEB_BASE_URL}
+      GOOGLE_ADMIN_EMAILS: ${GOOGLE_ADMIN_EMAILS}
+      WEB_PORT: ${WEB_PORT}
     volumes:
       - ./config/:/config
     restart: unless-stopped
@@ -49,6 +61,7 @@ services:
 
 - `BOT_TOKEN`: Your Telegram bot token.
 - `ADMIN_USER_IDS`: A comma-separated list of Telegram user IDs of the admins.
+- `DB_PATH`: Path to the database JSON file (e.g. `.local.db.json`).
 - `DOOR_CODE`: The door code.
 - **For HTTP Mode:**
   - `GATE_URL`: The endpoint that gets called when an authorized user runs `/open`.
@@ -56,20 +69,57 @@ services:
   - `MQTT_URL`: The MQTT broker URL.
   - `MQTT_COMMAND_TOPIC`: The MQTT topic used to send open commands.
   - `MQTT_DISCOVERY_TOPIC`: The MQTT topic used for Home Assistant discovery.
+- **For the Web UI (all required if `WEB_ENABLED=true`):**
+  - `WEB_ENABLED`: Set to `true` to enable the web server (default `false`).
+  - `GOOGLE_CLIENT_ID`: Your Google OAuth 2.0 client ID.
+  - `GOOGLE_CLIENT_SECRET`: Your Google OAuth 2.0 client secret.
+  - `WEB_SESSION_SECRET`: A random string used to sign session cookies.
+  - `WEB_BASE_URL`: The public URL of the web server (e.g. `https://gate.example.com` or `http://localhost:3000`).
+  - `GOOGLE_ADMIN_EMAILS`: A comma-separated list of email addresses that have admin access on the web UI.
 
 4. Run the bot:
    ```sh
    yarn start
    ```
 
-## Commands
+## Usage
 
-- `/start`: Start the bot.
-- `/help`: Get help on how to use the bot.
-- `/check_authorization`: Check if you are allowed to open the gate.
-- `/request_access`: Request access to open the gate.
-- `/open`: Open the gate.
-- `/door_code`: Get the door code.
+### Telegram Commands
+
+| Command | Description |
+|---|---|
+| `/start` | Start the bot |
+| `/help` | Get help on how to use the bot |
+| `/check_authorization` | Check if you are allowed to open the gate |
+| `/request_access` | Request access to open the gate |
+| `/open` | Open the gate |
+| `/door_code` | Get the door code |
+
+### Web UI
+
+The web server is started automatically when the Google OAuth environment variables are configured.
+
+| Feature | URL | Access |
+|---|---|---|
+| Login | `/` → Sign in with Google | Public |
+| Dashboard | `/dashboard` | Any authenticated user |
+| Open Gate | `/dashboard` (Open Gate button) | Authorized users |
+| Admin Panel | `/admin` | Users with email in `GOOGLE_ADMIN_EMAILS` |
+| Pending Requests | `/admin/pending` | Admins |
+| Manage Users | `/admin/users` | Admins |
+
+**Flow for web users:**
+
+1. Visit the site and sign in with Google.
+2. If not yet authorized, click "Request Access".
+3. An admin (via Telegram or the web admin panel) approves the request.
+4. The user can now open the gate from the dashboard.
+
+**Admin panel features:**
+
+- View pending access requests from both Telegram and web users.
+- Approve or deny requests with one click.
+- View all authorized users and remove them if needed.
 
 ## MQTT Integration
 

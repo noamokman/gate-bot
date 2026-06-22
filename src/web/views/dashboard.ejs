@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+  <% if (typeof message !== 'undefined' && message) { %>
+    <div class="message message-info"><%= message.replace(/\n/g, '<br>') %></div>
+  <% } %>
+
+  <div class="card">
+    <h1>Dashboard</h1>
+    <p>Signed in as <strong><%= user.name %></strong> (<%= user.email %>)</p>
+    <% if (isAllowed) { %>
+      <div class="message message-success">You are authorized to open the gate.</div>
+      <form method="post" action="/dashboard/open">
+        <button type="submit" class="btn">Open Gate</button>
+      </form>
+      <% if (doorCode) { %>
+        <div class="card mt-1">
+          <h1>Door Code</h1>
+          <p style="font-size: 1.5rem; font-weight: 700; letter-spacing: 0.25em; text-align: center;"><%= doorCode %></p>
+        </div>
+      <% } %>
+    <% } else { %>
+      <div class="message message-error">You are not authorized to open the gate.</div>
+      <form method="post" action="/dashboard/request-access">
+        <button type="submit" class="btn">Request Access</button>
+      </form>
+    <% } %>
+  </div>
+<%- include('partials/footer') %>

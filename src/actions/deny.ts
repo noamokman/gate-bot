@@ -2,6 +2,7 @@ import type { Telegraf } from 'telegraf';
 import pMap from 'p-map';
 import { adminUserIds } from '../framework/environment.js';
 import { accessDenied } from '../services/messages.js';
+import { removePendingRequest } from '../services/db.js';
 import { isAdmin } from '../services/authorize.js';
 
 export const denyAction = (bot: Telegraf) => {
@@ -30,6 +31,8 @@ export const denyAction = (bot: Telegraf) => {
     if (ctx.callbackQuery.message && 'text' in ctx.callbackQuery.message) {
       await ctx.editMessageText(`${ctx.callbackQuery.message.text}\nDenied`);
     }
+
+    await removePendingRequest(`telegram:${userId}`);
 
     await ctx.telegram.sendMessage(userId, accessDenied);
 

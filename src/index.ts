@@ -3,7 +3,7 @@ import type { Context } from 'telegraf';
 import { Telegraf } from 'telegraf';
 // eslint-disable-next-line import-x/extensions
 import { message } from 'telegraf/filters';
-import { botToken, doorCode } from './framework/environment.js';
+import { botToken, doorCode, webConfig } from './framework/environment.js';
 import { authorizeContext } from './services/authorize.js';
 import { allowed, helpAllowed, notAllowed, welcome } from './services/messages.js';
 import { openCommand } from './commands/open.js';
@@ -14,6 +14,7 @@ import { allowAction } from './actions/allow.js';
 import { denyAction } from './actions/deny.js';
 import { versionCommand } from './commands/version.js';
 import { initMqtt } from './services/mqtt.js';
+import { startWebServer } from './web/app.js';
 
 const bot = new Telegraf(botToken);
 
@@ -48,5 +49,9 @@ process.once('SIGTERM', () => {
 });
 
 await initMqtt();
+
+if (webConfig) {
+  startWebServer();
+}
 
 await bot.launch();
