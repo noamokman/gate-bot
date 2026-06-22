@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+  <div class="card">
+    <h1>Pending Requests</h1>
+    <% if (pendingRequests.length === 0) { %>
+      <p>No pending requests.</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Source</th>
+            <th>Contact</th>
+            <th>Requested</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pendingRequests.forEach(function(r) { %>
+            <tr>
+              <td><%= r.name || 'Unknown' %></td>
+              <td><span class="badge badge-<%= r.sourceType %>"><%= r.sourceType %></span></td>
+              <td><%= r.email || r.sourceUserId %></td>
+              <td><%= new Date(r.requestedAt).toLocaleString() %></td>
+              <td>
+                <form method="post" action="/admin/pending/<%= r.id %>/allow" class="inline">
+                  <button type="submit" class="btn btn-success" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">Allow</button>
+                </form>
+                <form method="post" action="/admin/pending/<%= r.id %>/deny" class="inline">
+                  <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">Deny</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+  <a href="/admin">&larr; Back to Admin</a>
+<%- include('../partials/footer') %>

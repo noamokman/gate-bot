@@ -1,7 +1,7 @@
 import type { Telegraf } from 'telegraf';
 import pMap from 'p-map';
 import { adminUserIds } from '../framework/environment.js';
-import { addAllowedUser } from '../services/db.js';
+import { addAllowedUser, removePendingRequest } from '../services/db.js';
 import { allowed } from '../services/messages.js';
 import { isAdmin } from '../services/authorize.js';
 
@@ -32,6 +32,7 @@ export const allowAction = (bot: Telegraf) => {
     }
 
     await addAllowedUser(userId);
+    await removePendingRequest(`telegram:${userId}`);
 
     await ctx.telegram.sendMessage(userId, allowed);
 
