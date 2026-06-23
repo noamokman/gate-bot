@@ -23,6 +23,13 @@ const sendTelegram = (chatId: string, text: string, inlineKeyboard?: Record<stri
   });
 };
 
+router.get('/status', (req, res): void => {
+  const user = req.session.user!;
+  const allowed = user.isAdmin || isWebUserAllowed(user.googleId);
+
+  res.json({ allowed });
+});
+
 router.get('/', (req, res): void => {
   const user = req.session.user!;
   const allowed = user.isAdmin || isWebUserAllowed(user.googleId);
