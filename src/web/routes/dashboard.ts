@@ -7,12 +7,19 @@ import { failedToOpen, opening, requestSent, alreadyAllowed } from '../../servic
 
 const router = Router();
 
-const sendTelegram = (chatId: string, text: string) => {
+const sendTelegram = (chatId: string, text: string, inlineKeyboard?: Record<string, string>[][]) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const body: Record<string, unknown> = { chat_id: chatId, text };
+
+  if (inlineKeyboard) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    body.reply_markup = { inline_keyboard: inlineKeyboard };
+  }
+
   void fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    body: JSON.stringify({ chat_id: chatId, text }),
+    body: JSON.stringify(body),
   });
 };
 
@@ -72,8 +79,15 @@ router.post('/request-access', async (req, res): Promise<void> => {
     requestedAt: new Date().toISOString(),
   });
 
-  await pMap([...adminUserIds], (adminId) => {
-    sendTelegram(adminId, `Web access request\nName: ${user.name}\nEmail: ${user.email}\nGoogle ID: ${user.googleId}`);
+  await pMap(adminUserIds, (adminId) => {
+    sendTelegram(adminId, `Web access request\nName: ${user.name}\nEmail: ${user.email}\nGoogle ID: ${user.googleId}`, [
+      [
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        { text: 'Allow✅', callback_data: `allow_${user.googleId}` },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        { text: 'Deny⛔', callback_data: `deny_${user.googleId}` },
+      ],
+    ]);
   });
 
   res.render('dashboard', { user, isAllowed: false, doorCode: null, message: requestSent });

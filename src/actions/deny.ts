@@ -2,7 +2,7 @@ import type { Telegraf } from 'telegraf';
 import pMap from 'p-map';
 import { adminUserIds } from '../framework/environment.js';
 import { accessDenied } from '../services/messages.js';
-import { removePendingRequest } from '../services/db.js';
+import { getPendingRequests, removePendingRequest } from '../services/db.js';
 import { isAdmin } from '../services/authorize.js';
 
 export const denyAction = (bot: Telegraf) => {
@@ -19,11 +19,31 @@ export const denyAction = (bot: Telegraf) => {
       return ctx.reply('Something went wrong');
     }
 
-    await pMap(
-      [...adminUserIds].filter((id) => id !== issuingUserId),
-      (adminUserId) =>
-        ctx.telegram.sendMessage(adminUserId, `User ${userId} was denied access to open the gate by ${ctx.from?.first_name}`),
-    );
+    const pendingRequests = getPendingRequests();
+    const pending = pendingRequests.find((r) => r.sourceUserId === userId);
+
+    if (pending?.sourceType === 'web') {
+      await pMap(
+        [...adminUserIds].filter((id) => id !== issuingUserId),
+        (adminUserId) =>
+          ctx.telegram.sendMessage(
+            adminUserId,
+            `Web user ${pending.name ?? userId} (${pending.email ?? ''}) was denied access by ${ctx.from?.first_name}`,
+          ),
+      );
+
+      await removePendingRequest(pending.id);
+    } else {
+      await pMap(
+        [...adminUserIds].filter((id) => id !== issuingUserId),
+        (adminUserId) =>
+          ctx.telegram.sendMessage(adminUserId, `User ${userId} was denied access to open the gate by ${ctx.from?.first_name}`),
+      );
+
+      await removePendingRequest(`telegram:${userId}`);
+
+      await ctx.telegram.sendMessage(userId, accessDenied);
+    }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
@@ -31,10 +51,6 @@ export const denyAction = (bot: Telegraf) => {
     if (ctx.callbackQuery.message && 'text' in ctx.callbackQuery.message) {
       await ctx.editMessageText(`${ctx.callbackQuery.message.text}\nDenied`);
     }
-
-    await removePendingRequest(`telegram:${userId}`);
-
-    await ctx.telegram.sendMessage(userId, accessDenied);
 
     return ctx.answerCbQuery('User was denied access to open the gate');
   });
