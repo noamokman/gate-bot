@@ -7,6 +7,7 @@ import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { adminRouter } from './routes/admin.js';
 import { ensureAuth, ensureAdmin } from './middleware.js';
+import { detectLocale, t } from './locales/index.js';
 
 const viewsDir = join(dirname(fileURLToPath(import.meta.url)), 'views');
 
@@ -30,6 +31,37 @@ export const startWebServer = () => {
       saveUninitialized: false,
     }),
   );
+
+  app.use((req, res, next) => {
+    const locale = req.session.locale ?? detectLocale(req.headers['accept-language']);
+
+    req.session.locale = locale;
+
+    res.locals.t = (key: string) => t(locale, key);
+    res.locals.locale = locale;
+
+    next();
+  });
+
+  app.post('/language', (req, res) => {
+    const locale = req.body.locale as string | undefined;
+
+    if (locale && ['en', 'ru', 'he'].includes(locale)) {
+      req.session.locale = locale;
+    }
+
+    res.redirect(req.headers.referer ?? '/');
+  });
+
+  app.get('/language', (req, res) => {
+    const locale = req.query.locale as string | undefined;
+
+    if (locale && ['en', 'ru', 'he'].includes(locale)) {
+      req.session.locale = locale;
+    }
+
+    res.redirect(req.headers.referer ?? '/');
+  });
 
   app.use('/auth', authRouter);
   app.use('/dashboard', ensureAuth, dashboardRouter);

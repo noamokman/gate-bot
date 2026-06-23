@@ -1,17 +1,17 @@
 <%- include('../partials/header') %>
   <div class="card">
-    <h1>Pending Requests</h1>
+    <h1><%= t('admin.pendingRequests') %></h1>
     <% if (pendingRequests.length === 0) { %>
-      <p>No pending requests.</p>
+      <p><%= t('admin.noPending') %></p>
     <% } else { %>
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Source</th>
-            <th>Contact</th>
-            <th>Requested</th>
-            <th>Actions</th>
+            <th><%= t('admin.name') %></th>
+            <th><%= t('admin.source') %></th>
+            <th><%= t('admin.contact') %></th>
+            <th><%= t('admin.requested') %></th>
+            <th><%= t('admin.actions') %></th>
           </tr>
         </thead>
         <tbody>
@@ -23,10 +23,10 @@
               <td><%= new Date(r.requestedAt).toLocaleString() %></td>
               <td>
                 <form method="post" action="/admin/pending/<%= r.id %>/allow" class="inline">
-                  <button type="submit" class="btn btn-success" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">Allow</button>
+                  <button type="submit" class="btn btn-success" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.allow') %></button>
                 </form>
                 <form method="post" action="/admin/pending/<%= r.id %>/deny" class="inline">
-                  <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">Deny</button>
+                  <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.deny') %></button>
                 </form>
               </td>
             </tr>
@@ -35,5 +35,5 @@
       </table>
     <% } %>
   </div>
-  <a href="/admin">&larr; Back to Admin</a>
+  <a href="/admin">&larr; <%= t('admin.back') %></a>
 <%- include('../partials/footer') %>

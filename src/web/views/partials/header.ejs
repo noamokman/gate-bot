@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="<%= locale %>" dir="<%= locale === 'he' ? 'rtl' : 'ltr' %>" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,6 @@
       --danger: #d93025;
       --border: #dadce0;
       --radius: 8px;
-      --nav-icon: invert(0);
     }
     [data-theme="dark"] {
       --bg: #1a1a2e;
@@ -28,7 +27,6 @@
       --success: #34d399;
       --danger: #f87171;
       --border: #2a2a4a;
-      --nav-icon: invert(1);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -52,7 +50,17 @@
     nav a:hover { text-decoration: underline; }
     nav .spacer { flex: 1; }
     nav .user-name { font-size: 0.85rem; color: var(--text-secondary); }
+    nav select.lang-select {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.3rem 0.5rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
     .container { max-width: 48rem; margin: 2rem auto; padding: 0 1rem; }
+    [dir="rtl"] .container { margin-right: auto; margin-left: auto; }
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -117,6 +125,7 @@
     .badge-web { background: #1a3a2e; color: #34d399; }
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    [dir="rtl"] th, [dir="rtl"] td { text-align: right; }
     th { font-weight: 600; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; }
     tr:last-child td { border-bottom: none; }
     .stats { display: flex; gap: 1rem; }
@@ -149,20 +158,34 @@
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
+    (function() {
+      var saved = localStorage.getItem('locale');
+      var current = '<%= locale %>';
+      if (saved && saved !== current) {
+        window.location.href = '/language?locale=' + saved + '&redirect=' + encodeURIComponent(window.location.pathname);
+      }
+    })();
   </script>
 </head>
 <body>
   <nav>
     <a href="/" class="brand">Gate Bot</a>
     <% if (typeof user !== 'undefined' && user) { %>
-      <a href="/dashboard">Dashboard</a>
+      <a href="/dashboard"><%= t('nav.dashboard') %></a>
       <% if (user.isAdmin) { %>
-        <a href="/admin">Admin</a>
+        <a href="/admin"><%= t('nav.admin') %></a>
       <% } %>
       <span class="spacer"></span>
       <span class="user-name"><%= user.name %></span>
+      <form method="post" action="/language" style="display:inline">
+        <select name="locale" class="lang-select" onchange="this.form.submit()">
+          <option value="en" <%= locale === 'en' ? 'selected' : '' %>>English</option>
+          <option value="ru" <%= locale === 'ru' ? 'selected' : '' %>>Русский</option>
+          <option value="he" <%= locale === 'he' ? 'selected' : '' %>>עברית</option>
+        </select>
+      </form>
       <button class="btn-theme" id="themeToggle" title="Toggle theme"></button>
-      <a href="/auth/logout">Logout</a>
+      <a href="/auth/logout"><%= t('nav.logout') %></a>
     <% } %>
   </nav>
   <div class="container">

@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "dashboard": "לוח בקרה",
+    "admin": "ניהול",
+    "logout": "התנתק"
+  },
+  "login": {
+    "title": "Gate Bot",
+    "subtitle": "התחבר כדי לפתוח את השער או לנהל גישה.",
+    "signIn": "התחבר באמצעות Google"
+  },
+  "dashboard": {
+    "title": "לוח בקרה",
+    "signedInAs": "מחובר כ",
+    "authorized": "יש לך הרשאה לפתוח את השער.",
+    "openGate": "פתח שער",
+    "doorCode": "קוד שער",
+    "notAuthorized": "אין לך הרשאה לפתוח את השער.",
+    "requestAccess": "בקש גישה",
+    "requestSent": "הבקשה נשלחה! המתן לאישור מנהל.",
+    "alreadyAllowed": "כבר יש לך הרשאה לפתוח את השער!"
+  },
+  "admin": {
+    "title": "ניהול",
+    "pendingRequests": "בקשות ממתינות",
+    "allowedUsers": "משתמשים מורשים",
+    "manageRequests": "ניהול בקשות",
+    "manageUsers": "ניהול משתמשים",
+    "noPending": "אין בקשות ממתינות.",
+    "noUsers": "אין משתמשים מורשים.",
+    "name": "שם",
+    "source": "מקור",
+    "contact": "איש קשר",
+    "requested": "נשלח",
+    "actions": "פעולות",
+    "allow": "אפשר",
+    "deny": "דחה",
+    "remove": "הסר",
+    "back": "חזרה לניהול"
+  }
+}

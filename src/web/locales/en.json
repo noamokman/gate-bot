@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "logout": "Logout"
+  },
+  "login": {
+    "title": "Gate Bot",
+    "subtitle": "Sign in to open the gate or manage access.",
+    "signIn": "Sign in with Google"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "signedInAs": "Signed in as",
+    "authorized": "You are authorized to open the gate.",
+    "openGate": "Open Gate",
+    "doorCode": "Door Code",
+    "notAuthorized": "You are not authorized to open the gate.",
+    "requestAccess": "Request Access",
+    "requestSent": "Request sent! Wait for an admin to approve you.",
+    "alreadyAllowed": "You are already allowed to open the gate!"
+  },
+  "admin": {
+    "title": "Admin",
+    "pendingRequests": "Pending Requests",
+    "allowedUsers": "Allowed Users",
+    "manageRequests": "Manage Requests",
+    "manageUsers": "Manage Users",
+    "noPending": "No pending requests.",
+    "noUsers": "No allowed users.",
+    "name": "Name",
+    "source": "Source",
+    "contact": "Contact",
+    "requested": "Requested",
+    "actions": "Actions",
+    "allow": "Allow",
+    "deny": "Deny",
+    "remove": "Remove",
+    "back": "Back to Admin"
+  }
+}

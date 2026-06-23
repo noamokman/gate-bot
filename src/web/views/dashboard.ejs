@@ -4,23 +4,23 @@
   <% } %>
 
   <div class="card">
-    <h1>Dashboard</h1>
-    <p>Signed in as <strong><%= user.name %></strong> (<%= user.email %>)</p>
+    <h1><%= t('dashboard.title') %></h1>
+    <p><%= t('dashboard.signedInAs') %> <strong><%= user.name %></strong> (<%= user.email %>)</p>
     <% if (isAllowed) { %>
-      <div class="message message-success">You are authorized to open the gate.</div>
+      <div class="message message-success"><%= t('dashboard.authorized') %></div>
       <form method="post" action="/dashboard/open">
-        <button type="submit" class="btn">Open Gate</button>
+        <button type="submit" class="btn"><%= t('dashboard.openGate') %></button>
       </form>
       <% if (doorCode) { %>
         <div class="card mt-1">
-          <h1>Door Code</h1>
+          <h1><%= t('dashboard.doorCode') %></h1>
           <p style="font-size: 1.5rem; font-weight: 700; letter-spacing: 0.25em; text-align: center;"><%= doorCode %></p>
         </div>
       <% } %>
     <% } else { %>
-      <div class="message message-error">You are not authorized to open the gate.</div>
+      <div class="message message-error"><%= t('dashboard.notAuthorized') %></div>
       <form method="post" action="/dashboard/request-access">
-        <button type="submit" class="btn">Request Access</button>
+        <button type="submit" class="btn"><%= t('dashboard.requestAccess') %></button>
       </form>
     <% } %>
   </div>
@@ -28,7 +28,7 @@
   <% if (!isAllowed) { %>
   <script>
     (function() {
-      let pollId;
+      var pollId;
 
       function checkAuth() {
         fetch('/dashboard/status')

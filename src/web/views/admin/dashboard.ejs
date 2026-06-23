@@ -2,15 +2,15 @@
   <div class="stats mb-1">
     <div class="stat">
       <div class="stat-value"><%= pendingCount %></div>
-      <div class="stat-label">Pending Requests</div>
+      <div class="stat-label"><%= t('admin.pendingRequests') %></div>
     </div>
     <div class="stat">
       <div class="stat-value"><%= allowedCount %></div>
-      <div class="stat-label">Allowed Users</div>
+      <div class="stat-label"><%= t('admin.allowedUsers') %></div>
     </div>
   </div>
   <div class="flex gap-1">
-    <a href="/admin/pending" class="btn">Manage Requests</a>
-    <a href="/admin/users" class="btn">Manage Users</a>
+    <a href="/admin/pending" class="btn"><%= t('admin.manageRequests') %></a>
+    <a href="/admin/users" class="btn"><%= t('admin.manageUsers') %></a>
   </div>
 <%- include('../partials/footer') %>

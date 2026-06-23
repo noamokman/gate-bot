@@ -1,16 +1,16 @@
 <%- include('../partials/header') %>
   <div class="card">
-    <h1>Allowed Users</h1>
+    <h1><%= t('admin.allowedUsers') %></h1>
     <% if (allowedUsers.length === 0) { %>
-      <p>No allowed users.</p>
+      <p><%= t('admin.noUsers') %></p>
     <% } else { %>
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Source</th>
-            <th>Contact</th>
-            <th>Actions</th>
+            <th><%= t('admin.name') %></th>
+            <th><%= t('admin.source') %></th>
+            <th><%= t('admin.contact') %></th>
+            <th><%= t('admin.actions') %></th>
           </tr>
         </thead>
         <tbody>
@@ -21,7 +21,7 @@
               <td><%= u.email || u.sourceUserId %></td>
               <td>
                 <form method="post" action="/admin/users/<%= u.sourceType %>/<%= u.sourceUserId %>/remove" class="inline">
-                  <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">Remove</button>
+                  <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.remove') %></button>
                 </form>
               </td>
             </tr>
@@ -30,5 +30,5 @@
       </table>
     <% } %>
   </div>
-  <a href="/admin">&larr; Back to Admin</a>
+  <a href="/admin">&larr; <%= t('admin.back') %></a>
 <%- include('../partials/footer') %>

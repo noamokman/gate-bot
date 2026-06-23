@@ -4,6 +4,7 @@ declare module 'express-session' {
   interface SessionData {
     user?: { googleId: string; email: string; name: string; isAdmin: boolean };
     oauthState?: string;
+    locale?: string;
   }
 }
 
