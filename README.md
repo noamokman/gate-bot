@@ -163,13 +163,18 @@ Example message published:
 topic: home/gate_bot/event
 payload: {
   "event_type": "gate_bot_triggered",
-  "source": "telegram_bot",
+  "source": "gate_bot",
   "action": "open_gate",
   "userInfo": {
-    "id": "123456789",
-    "username": "example_user"
+    "userId": "123456789",
+    "username": "example_user",
+    "firstName": "John",
+    "lastName": "Doe",
+    "sourceType": "telegram"
   }
 }
 ```
+
+The `userInfo.sourceType` field indicates where the open request originated — `"telegram"` for the Telegram bot or `"web"` for the web dashboard.
 
 This allows Home Assistant to trigger the gate opening automatically.

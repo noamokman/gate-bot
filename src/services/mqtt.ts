@@ -49,7 +49,7 @@ export const open = async (userInfo: UserInfo) => {
   const eventPayload = JSON.stringify({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     event_type: eventType,
-    source: 'telegram_bot',
+    source: 'gate_bot',
     action: 'open_gate',
     userInfo,
   });

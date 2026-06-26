@@ -54,8 +54,9 @@ router.post('/open', async (req, res): Promise<void> => {
   try {
     await open({
       userId: user.googleId,
-      usename: user.email,
+      username: user.email,
       firstName: user.name,
+      sourceType: 'web',
     });
 
     res.render('dashboard', { user, isAllowed: true, doorCode: doorCode ?? null, message: opening });

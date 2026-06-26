@@ -1,8 +1,9 @@
 export interface UserInfo {
   userId: string;
-  usename?: string;
+  username?: string;
   firstName: string;
   lastName?: string;
+  sourceType: 'telegram' | 'web';
 }
 
 export interface WebSessionUser {
