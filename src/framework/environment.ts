@@ -9,6 +9,10 @@ export const mqttCommandTopic = env.get('MQTT_COMMAND_TOPIC').asString();
 export const mqttDiscoveryTopic = env.get('MQTT_DISCOVERY_TOPIC').asString();
 export const dbPath = env.get('DB_PATH').required().asString();
 export const doorCode = env.get('DOOR_CODE').asString();
+export const parkingInfo = env.get('PARKING_INFO').asString();
+export const floor = env.get('FLOOR').asString();
+export const unit = env.get('UNIT').asString();
+export const propertyNotes = env.get('PROPERTY_NOTES').asString();
 export const buildVersion = env.get('BUILD_VERSION').default('0.0.0').asString();
 
 export interface WebConfig {
