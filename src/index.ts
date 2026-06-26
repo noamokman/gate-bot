@@ -37,7 +37,7 @@ await bot.telegram.setMyCommands([
   { command: 'open', description: 'Open the gate' },
   { command: 'check_authorization', description: 'Check if you are allowed to open the gate' },
   { command: 'request_access', description: 'Request access to open the gate' },
-  { command: 'info', description: 'View property info (door code, parking, floor, unit)' },
+  { command: 'info', description: 'View property info (door code, parking, floor, unit, notes)' },
   { command: 'version', description: 'Show the current version' },
 ]);
 

@@ -27,7 +27,7 @@
         <% if (parkingInfo) { %><tr><td><strong><%= t('dashboard.infoParking') %></strong></td><td><%= parkingInfo %></td></tr><% } %>
         <% if (floor) { %><tr><td><strong><%= t('dashboard.infoFloor') %></strong></td><td><%= floor %></td></tr><% } %>
         <% if (unit) { %><tr><td><strong><%= t('dashboard.infoUnit') %></strong></td><td><%= unit %></td></tr><% } %>
-        <% if (propertyNotes) { %><tr><td><strong><%= t('dashboard.infoNotes') %></strong></td><td><%= propertyNotes %></td></tr><% } %>
+        <% if (propertyNotes) { %><tr><td><strong><%= t('dashboard.infoNotes') %></strong></td><td style="white-space: pre-wrap;"><%= propertyNotes %></td></tr><% } %>
       </table>
     </div>
   <% } %>

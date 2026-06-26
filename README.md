@@ -35,6 +35,10 @@ services:
       ADMIN_USER_IDS: ${ADMIN_USER_IDS}
       GATE_URL: ${GATE_URL} # Required for HTTP mode
       DOOR_CODE: ${DOOR_CODE}
+      PARKING_INFO: ${PARKING_INFO}
+      FLOOR: ${FLOOR}
+      UNIT: ${UNIT}
+      PROPERTY_NOTES: ${PROPERTY_NOTES}
       MQTT_URL: ${MQTT_URL} # Required for MQTT mode
       MQTT_COMMAND_TOPIC: ${MQTT_COMMAND_TOPIC} # Required for MQTT mode
       MQTT_DISCOVERY_TOPIC: ${MQTT_DISCOVERY_TOPIC} # Required for MQTT mode
@@ -99,8 +103,7 @@ services:
 | `/check_authorization` | Check if you are allowed to open the gate |
 | `/request_access` | Request access to open the gate |
 | `/open` | Open the gate |
-| `/door_code` | Get the door code |
-| `/info` | View property info (door code, parking, floor, unit) |
+| `/info` | View property info (door code, parking, floor, unit, notes) |
 
 ### Web UI
 
