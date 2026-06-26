@@ -9,6 +9,7 @@ This is a Telegram bot and web UI that allows authorized users to open a gate. I
 - **Open the Gate**: Authorized users can open the gate via the `/open` command or the web dashboard.
 - **Check Authorization**: Users can check if they are authorized to open the gate by sending the `/check_authorization` command.
 - **Get the Door Code**: Authorized users can get the door code by sending the `/door_code` command.
+- **Property Info**: View property details (door code, parking instructions, floor, unit) set via environment variables, accessible through the `/info` Telegram command or the web dashboard.
 - **Supports Two Modes**:
   - **HTTP Mode**: Calls an HTTP endpoint to open the gate.
   - **MQTT Mode**: Uses MQTT to communicate with Home Assistant.
@@ -63,6 +64,10 @@ services:
 - `ADMIN_USER_IDS`: A comma-separated list of Telegram user IDs of the admins.
 - `DB_PATH`: Path to the database JSON file (e.g. `.local.db.json`).
 - `DOOR_CODE`: The door code.
+- `PARKING_INFO`: Parking instructions.
+- `FLOOR`: Floor number.
+- `UNIT`: Unit / apartment number.
+- `PROPERTY_NOTES`: Any additional property notes.
 - **For HTTP Mode:**
   - `GATE_URL`: The endpoint that gets called when an authorized user runs `/open`.
 - **For MQTT Mode:**
@@ -95,6 +100,7 @@ services:
 | `/request_access` | Request access to open the gate |
 | `/open` | Open the gate |
 | `/door_code` | Get the door code |
+| `/info` | View property info (door code, parking, floor, unit) |
 
 ### Web UI
 
@@ -105,6 +111,7 @@ The web server is started automatically when the Google OAuth environment variab
 | Login | `/` → Sign in with Google | Public |
 | Dashboard | `/dashboard` | Any authenticated user |
 | Open Gate | `/dashboard` (Open Gate button) | Authorized users |
+| Property Info | `/dashboard` (info card) | Authorized users |
 | Admin Panel | `/admin` | Users with email in `GOOGLE_ADMIN_EMAILS` |
 | Pending Requests | `/admin/pending` | Admins |
 | Manage Users | `/admin/users` | Admins |

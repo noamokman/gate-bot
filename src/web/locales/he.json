@@ -18,7 +18,12 @@
     "notAuthorized": "אין לך הרשאה לפתוח את השער.",
     "requestAccess": "בקש גישה",
     "requestSent": "הבקשה נשלחה! המתן לאישור מנהל.",
-    "alreadyAllowed": "כבר יש לך הרשאה לפתוח את השער!"
+    "alreadyAllowed": "כבר יש לך הרשאה לפתוח את השער!",
+    "propertyInfo": "מידע על הנכס",
+    "infoParking": "הוראות חניה",
+    "infoFloor": "קומה",
+    "infoUnit": "דירה / מספר",
+    "infoNotes": "הערות"
   },
   "admin": {
     "title": "ניהול",

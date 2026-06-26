@@ -18,7 +18,12 @@
     "notAuthorized": "You are not authorized to open the gate.",
     "requestAccess": "Request Access",
     "requestSent": "Request sent! Wait for an admin to approve you.",
-    "alreadyAllowed": "You are already allowed to open the gate!"
+    "alreadyAllowed": "You are already allowed to open the gate!",
+    "propertyInfo": "Property Info",
+    "infoParking": "Parking Instructions",
+    "infoFloor": "Floor",
+    "infoUnit": "Unit / Apartment",
+    "infoNotes": "Notes"
   },
   "admin": {
     "title": "Admin",

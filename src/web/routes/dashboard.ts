@@ -2,7 +2,7 @@ import { Router } from 'express';
 import pMap from 'p-map';
 import { open } from '../../services/open.js';
 import { isWebUserAllowed, addPendingRequest } from '../../services/db.js';
-import { botToken, adminUserIds, doorCode } from '../../framework/environment.js';
+import { botToken, adminUserIds, doorCode, parkingInfo, floor, unit, propertyNotes } from '../../framework/environment.js';
 import { failedToOpen, opening, requestSent, alreadyAllowed } from '../../services/messages.js';
 
 const router = Router();
@@ -38,6 +38,10 @@ router.get('/', (req, res): void => {
     user,
     isAllowed: allowed,
     doorCode: allowed && doorCode ? doorCode : null,
+    parkingInfo: allowed ? parkingInfo ?? null : null,
+    floor: allowed ? floor ?? null : null,
+    unit: allowed ? unit ?? null : null,
+    propertyNotes: allowed ? propertyNotes ?? null : null,
     message: null,
   });
 });
@@ -47,7 +51,7 @@ router.post('/open', async (req, res): Promise<void> => {
   const allowed = user.isAdmin || isWebUserAllowed(user.googleId);
 
   if (!allowed) {
-    res.render('dashboard', { user, isAllowed: false, doorCode: null, message: 'Not authorized' });
+    res.render('dashboard', { user, isAllowed: false, doorCode: null, parkingInfo: null, floor: null, unit: null, propertyNotes: null, message: 'Not authorized' });
     return;
   }
 
@@ -59,12 +63,16 @@ router.post('/open', async (req, res): Promise<void> => {
       sourceType: 'web',
     });
 
-    res.render('dashboard', { user, isAllowed: true, doorCode: doorCode ?? null, message: opening });
+    res.render('dashboard', { user, isAllowed: true, doorCode: doorCode ?? null, parkingInfo: parkingInfo ?? null, floor: floor ?? null, unit: unit ?? null, propertyNotes: propertyNotes ?? null, message: opening });
   } catch (error) {
     res.render('dashboard', {
       user,
       isAllowed: true,
       doorCode: doorCode ?? null,
+      parkingInfo: parkingInfo ?? null,
+      floor: floor ?? null,
+      unit: unit ?? null,
+      propertyNotes: propertyNotes ?? null,
       message: error instanceof Error ? `${failedToOpen}\n${error.message}` : failedToOpen,
     });
   }
@@ -74,7 +82,7 @@ router.post('/request-access', async (req, res): Promise<void> => {
   const user = req.session.user!;
 
   if (user.isAdmin || isWebUserAllowed(user.googleId)) {
-    res.render('dashboard', { user, isAllowed: true, doorCode: doorCode ?? null, message: alreadyAllowed });
+    res.render('dashboard', { user, isAllowed: true, doorCode: doorCode ?? null, parkingInfo: parkingInfo ?? null, floor: floor ?? null, unit: unit ?? null, propertyNotes: propertyNotes ?? null, message: alreadyAllowed });
     return;
   }
 
@@ -98,7 +106,7 @@ router.post('/request-access', async (req, res): Promise<void> => {
     ]);
   });
 
-  res.render('dashboard', { user, isAllowed: false, doorCode: null, message: requestSent });
+  res.render('dashboard', { user, isAllowed: false, doorCode: null, parkingInfo: null, floor: null, unit: null, propertyNotes: null, message: requestSent });
 });
 
 export { router as dashboardRouter };

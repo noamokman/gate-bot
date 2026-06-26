@@ -11,12 +11,6 @@
       <form method="post" action="/dashboard/open">
         <button type="submit" class="btn"><%= t('dashboard.openGate') %></button>
       </form>
-      <% if (doorCode) { %>
-        <div class="card mt-1">
-          <h1><%= t('dashboard.doorCode') %></h1>
-          <p style="font-size: 1.5rem; font-weight: 700; letter-spacing: 0.25em; text-align: center;"><%= doorCode %></p>
-        </div>
-      <% } %>
     <% } else { %>
       <div class="message message-error"><%= t('dashboard.notAuthorized') %></div>
       <form method="post" action="/dashboard/request-access">
@@ -24,6 +18,19 @@
       </form>
     <% } %>
   </div>
+
+  <% if (isAllowed && (doorCode || parkingInfo || floor || unit || propertyNotes)) { %>
+    <div class="card">
+      <h1><%= t('dashboard.propertyInfo') %></h1>
+      <table>
+        <% if (doorCode) { %><tr><td><strong><%= t('dashboard.doorCode') %></strong></td><td><%= doorCode %></td></tr><% } %>
+        <% if (parkingInfo) { %><tr><td><strong><%= t('dashboard.infoParking') %></strong></td><td><%= parkingInfo %></td></tr><% } %>
+        <% if (floor) { %><tr><td><strong><%= t('dashboard.infoFloor') %></strong></td><td><%= floor %></td></tr><% } %>
+        <% if (unit) { %><tr><td><strong><%= t('dashboard.infoUnit') %></strong></td><td><%= unit %></td></tr><% } %>
+        <% if (propertyNotes) { %><tr><td><strong><%= t('dashboard.infoNotes') %></strong></td><td><%= propertyNotes %></td></tr><% } %>
+      </table>
+    </div>
+  <% } %>
 
   <% if (!isAllowed) { %>
   <script>
