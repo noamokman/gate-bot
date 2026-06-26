@@ -1,3 +1,4 @@
+import { dirname, join } from 'node:path';
 import env from 'env-var';
 
 export const botToken = env.get('BOT_TOKEN').required().asString();
@@ -17,6 +18,7 @@ export interface WebConfig {
   googleAdminEmails: Set<string>;
   webPort: number;
   webBaseUrl: string;
+  webSessionPath: string;
 }
 
 const webEnabled = env.get('WEB_ENABLED').default('false').asBool();
@@ -29,5 +31,9 @@ export const webConfig: WebConfig | undefined = webEnabled
       googleAdminEmails: env.get('GOOGLE_ADMIN_EMAILS').default('').asSet(),
       webPort: env.get('WEB_PORT').default('3000').asPortNumber(),
       webBaseUrl: env.get('WEB_BASE_URL').required().asString(),
+      webSessionPath: env
+        .get('WEB_SESSION_PATH')
+        .default(join(dirname(dbPath), 'sessions'))
+        .asString(),
     }
   : undefined;

@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import express from 'express';
 import session from 'express-session';
+import sessionFileStore from 'session-file-store';
 import { webConfig } from '../framework/environment.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
@@ -9,6 +10,8 @@ import { adminRouter } from './routes/admin.js';
 import { ensureAuth, ensureAdmin } from './middleware.js';
 import { detectLocale, t } from './locales/index.js';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const FileStore = sessionFileStore(session);
 const viewsDir = join(dirname(fileURLToPath(import.meta.url)), 'views');
 
 export const startWebServer = () => {
@@ -16,7 +19,7 @@ export const startWebServer = () => {
     return;
   }
 
-  const { webPort, webSessionSecret } = webConfig;
+  const { webPort, webSessionSecret, webSessionPath } = webConfig;
 
   const app = express();
 
@@ -29,6 +32,14 @@ export const startWebServer = () => {
       secret: webSessionSecret,
       resave: false,
       saveUninitialized: false,
+      store: new FileStore({
+        path: webSessionPath,
+        ttl: 30 * 24 * 60 * 60,
+        retries: 0,
+      }),
+      cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      },
     }),
   );
 

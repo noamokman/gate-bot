@@ -74,6 +74,7 @@ services:
   - `GOOGLE_CLIENT_ID`: Your Google OAuth 2.0 client ID.
   - `GOOGLE_CLIENT_SECRET`: Your Google OAuth 2.0 client secret.
   - `WEB_SESSION_SECRET`: A random string used to sign session cookies.
+  - `WEB_SESSION_PATH`: Path to the session storage directory (defaults to `<DB_PATH directory>/sessions`).
   - `WEB_BASE_URL`: The public URL of the web server (e.g. `https://gate.example.com` or `http://localhost:3000`).
   - `GOOGLE_ADMIN_EMAILS`: A comma-separated list of email addresses that have admin access on the web UI.
 
