@@ -7,7 +7,12 @@
   "login": {
     "title": "Gate Bot",
     "subtitle": "התחבר כדי לפתוח את השער או לנהל גישה.",
-    "signIn": "התחבר באמצעות Google"
+    "signIn": "התחבר באמצעות Google",
+    "signInPassword": "התחבר",
+    "username": "שם משתמש",
+    "password": "סיסמה",
+    "invalidCredentials": "שם משתמש או סיסמה שגויים.",
+    "missingCredentials": "נא להזין שם משתמש וסיסמה."
   },
   "dashboard": {
     "title": "לוח בקרה",

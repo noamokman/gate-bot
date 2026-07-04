@@ -15,6 +15,36 @@ export const unit = env.get('UNIT').asString();
 export const propertyNotes = env.get('PROPERTY_NOTES').asString();
 export const buildVersion = env.get('BUILD_VERSION').default('0.0.0').asString();
 
+export interface BasicAuthUser {
+  username: string;
+  password: string;
+  isAdmin: boolean;
+}
+
+const parseBasicAuthUsers = (): BasicAuthUser[] => {
+  const raw = env.get('BASIC_AUTH_USERS').asString();
+  if (!raw) {
+    return [];
+  }
+
+  return raw
+    .split(';')
+    .map((entry) => {
+      const [username, password, isAdminStr, ...rest] = entry.split(',');
+
+      if (!username || !password || !isAdminStr || rest.length > 0) {
+        return null;
+      }
+
+      const isAdmin = isAdminStr.toLowerCase() === 'true';
+
+      return { username, password, isAdmin };
+    })
+    .filter((user) => user !== null);
+};
+
+export const basicAuthUsers = parseBasicAuthUsers();
+
 export interface WebConfig {
   googleClientId: string;
   googleClientSecret: string;

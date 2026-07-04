@@ -7,7 +7,8 @@ export interface UserInfo {
 }
 
 export interface WebSessionUser {
-  googleId: string;
+  provider: 'google' | 'password';
+  id: string;
   email: string;
   name: string;
   isAdmin: boolean;

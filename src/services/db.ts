@@ -56,21 +56,21 @@ export const removePendingRequest = async (id: string) => {
 
 export const getPendingRequests = () => [...(db.data.pendingRequests ?? [])];
 
-export const addWebUser = async (googleId: string, info: { email: string; name: string }) => {
+export const addWebUser = async (userId: string, info: { email: string; name: string }) => {
   if (!db.data.webUsers) {
     db.data.webUsers = {};
   }
-  db.data.webUsers[googleId] = { googleId, ...info, allowed: true };
+  db.data.webUsers[userId] = { googleId: userId, ...info, allowed: true };
   await db.write();
 };
 
-export const isWebUserAllowed = (googleId: string) => db.data.webUsers?.[googleId]?.allowed ?? false;
+export const isWebUserAllowed = (userId: string) => db.data.webUsers?.[userId]?.allowed ?? false;
 
 export const getWebUsers = () => Object.values(db.data.webUsers ?? {}).filter((u) => u.allowed);
 
-export const removeWebUser = async (googleId: string) => {
+export const removeWebUser = async (userId: string) => {
   if (db.data.webUsers) {
-    delete db.data.webUsers[googleId];
+    delete db.data.webUsers[userId];
   }
   await db.write();
 };
