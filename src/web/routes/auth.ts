@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { Router } from 'express';
-import { webConfig as rawWebConfig } from '../../framework/environment.js';
+import { webConfig as rawWebConfig, basicAuthUsers } from '../../framework/environment.js';
 
 const webConfig = rawWebConfig!;
 const { googleClientId, googleClientSecret, webBaseUrl, googleAdminEmails } = webConfig;
@@ -73,7 +73,8 @@ router.get('/google/callback', async (req, res): Promise<void> => {
 
   const userInfo = (await userResponse.json()) as { id: string; email: string; name: string };
   const user = {
-    googleId: userInfo.id,
+    provider: 'google' as const,
+    id: userInfo.id,
     email: userInfo.email,
     name: userInfo.name,
     isAdmin: googleAdminEmails.has(userInfo.email),
@@ -81,6 +82,37 @@ router.get('/google/callback', async (req, res): Promise<void> => {
 
   // eslint-disable-next-line require-atomic-updates
   req.session.user = user;
+
+  res.redirect('/dashboard');
+});
+
+router.post('/password', (req, res): void => {
+  if (basicAuthUsers.length === 0) {
+    res.status(404).send('Not found');
+    return;
+  }
+
+  const { username, password } = req.body as { username?: string; password?: string };
+
+  if (!username || !password) {
+    res.redirect('/?error=missing');
+    return;
+  }
+
+  const match = basicAuthUsers.find((u) => u.username === username && u.password === password);
+
+  if (!match) {
+    res.redirect('/?error=invalid');
+    return;
+  }
+
+  req.session.user = {
+    provider: 'password',
+    id: username,
+    email: '',
+    name: username,
+    isAdmin: match.isAdmin,
+  };
 
   res.redirect('/dashboard');
 });

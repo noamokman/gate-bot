@@ -86,6 +86,7 @@ services:
   - `WEB_SESSION_PATH`: Path to the session storage directory (defaults to `<DB_PATH directory>/sessions`).
   - `WEB_BASE_URL`: The public URL of the web server (e.g. `https://gate.example.com` or `http://localhost:3000`).
   - `GOOGLE_ADMIN_EMAILS`: A comma-separated list of email addresses that have admin access on the web UI.
+  - `BASIC_AUTH_USERS`: Optional. A semicolon-separated list of username,password,isAdmin tuples for password-based login (e.g. `admin,secret,true;user,pass,false`). **Not recommended for production** — intended for testing and local development only.
 
 4. Run the bot:
    ```sh

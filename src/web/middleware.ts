@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 declare module 'express-session' {
   interface SessionData {
-    user?: { googleId: string; email: string; name: string; isAdmin: boolean };
+    user?: { provider: 'google' | 'password'; id: string; email: string; name: string; isAdmin: boolean };
     oauthState?: string;
     locale?: string;
   }

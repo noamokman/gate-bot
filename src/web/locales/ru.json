@@ -7,7 +7,12 @@
   "login": {
     "title": "Gate Bot",
     "subtitle": "Войдите, чтобы открыть ворота или управлять доступом.",
-    "signIn": "Войти через Google"
+    "signIn": "Войти через Google",
+    "signInPassword": "Войти",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "invalidCredentials": "Неверное имя пользователя или пароль.",
+    "missingCredentials": "Пожалуйста, введите имя пользователя и пароль."
   },
   "dashboard": {
     "title": "Панель",

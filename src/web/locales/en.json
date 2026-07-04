@@ -7,7 +7,12 @@
   "login": {
     "title": "Gate Bot",
     "subtitle": "Sign in to open the gate or manage access.",
-    "signIn": "Sign in with Google"
+    "signIn": "Sign in with Google",
+    "signInPassword": "Sign In",
+    "username": "Username",
+    "password": "Password",
+    "invalidCredentials": "Invalid username or password.",
+    "missingCredentials": "Please enter username and password."
   },
   "dashboard": {
     "title": "Dashboard",

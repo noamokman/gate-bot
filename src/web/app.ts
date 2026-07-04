@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import express from 'express';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
-import { webConfig } from '../framework/environment.js';
+import { webConfig, basicAuthUsers } from '../framework/environment.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { adminRouter } from './routes/admin.js';
@@ -84,7 +84,9 @@ export const startWebServer = () => {
       return;
     }
 
-    res.render('login');
+    const error = req.query.error as string | undefined;
+
+    res.render('login', { showPasswordLogin: basicAuthUsers.length > 0, error });
   });
 
   app.listen(webPort, () => {

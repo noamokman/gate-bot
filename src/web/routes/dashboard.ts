@@ -33,14 +33,14 @@ const buildPropertyInfo = (allowed: boolean) => ({
 
 router.get('/status', (req, res): void => {
   const user = req.session.user!;
-  const allowed = user.isAdmin || isWebUserAllowed(user.googleId);
+  const allowed = user.isAdmin || isWebUserAllowed(user.id);
 
   res.json({ allowed });
 });
 
 router.get('/', (req, res): void => {
   const user = req.session.user!;
-  const allowed = user.isAdmin || isWebUserAllowed(user.googleId);
+  const allowed = user.isAdmin || isWebUserAllowed(user.id);
 
   res.render('dashboard', {
     user,
@@ -52,7 +52,7 @@ router.get('/', (req, res): void => {
 
 router.post('/open', async (req, res): Promise<void> => {
   const user = req.session.user!;
-  const allowed = user.isAdmin || isWebUserAllowed(user.googleId);
+  const allowed = user.isAdmin || isWebUserAllowed(user.id);
 
   if (!allowed) {
     res.render('dashboard', { user, isAllowed: false, ...buildPropertyInfo(false), message: 'Not authorized' });
@@ -61,8 +61,8 @@ router.post('/open', async (req, res): Promise<void> => {
 
   try {
     await open({
-      userId: user.googleId,
-      username: user.email,
+      userId: user.id,
+      username: user.email || user.name,
       firstName: user.name,
       sourceType: 'web',
     });
@@ -81,27 +81,27 @@ router.post('/open', async (req, res): Promise<void> => {
 router.post('/request-access', async (req, res): Promise<void> => {
   const user = req.session.user!;
 
-  if (user.isAdmin || isWebUserAllowed(user.googleId)) {
+  if (user.isAdmin || isWebUserAllowed(user.id)) {
     res.render('dashboard', { user, isAllowed: true, ...buildPropertyInfo(true), message: alreadyAllowed });
     return;
   }
 
   await addPendingRequest({
-    id: `web:${user.googleId}`,
+    id: `web:${user.id}`,
     sourceType: 'web',
-    sourceUserId: user.googleId,
+    sourceUserId: user.id,
     name: user.name,
     email: user.email,
     requestedAt: new Date().toISOString(),
   });
 
   await pMap(adminUserIds, (adminId) => {
-    sendTelegram(adminId, `Web access request\nName: ${user.name}\nEmail: ${user.email}\nGoogle ID: ${user.googleId}`, [
+    sendTelegram(adminId, `Web access request\nName: ${user.name}\nEmail: ${user.email}\nUser ID: ${user.id}`, [
       [
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        { text: 'Allow✅', callback_data: `allow_${user.googleId}` },
+        { text: 'Allow✅', callback_data: `allow_${user.id}` },
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        { text: 'Deny⛔', callback_data: `deny_${user.googleId}` },
+        { text: 'Deny⛔', callback_data: `deny_${user.id}` },
       ],
     ]);
   });
