@@ -197,7 +197,8 @@
         padding: 1rem;
         gap: 0.5rem;
         transform: translateX(-100%);
-        transition: transform 0.2s;
+        visibility: hidden;
+        transition: transform 0.2s, visibility 0s 0.2s;
         box-shadow: 2px 0 12px rgba(0,0,0,0.3);
       }
       [dir="rtl"] .nav-links {
@@ -208,6 +209,8 @@
       }
       .nav-links.open {
         transform: translateX(0);
+        visibility: visible;
+        transition: transform 0.2s, visibility 0s;
       }
       .nav-drawer-close {
         display: block;
