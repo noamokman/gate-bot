@@ -144,6 +144,94 @@
     .mb-1 { margin-bottom: 1rem; }
     .flex { display: flex; }
     .gap-1 { gap: 0.5rem; }
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      color: var(--text);
+      font-size: 1.5rem;
+      line-height: 1;
+      margin-left: auto;
+    }
+    [dir="rtl"] .nav-toggle { margin-left: 0; margin-right: auto; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex: 1;
+    }
+    .nav-backdrop {
+      display: none;
+    }
+    .nav-drawer-close {
+      display: none;
+    }
+    @media (max-width: 640px) {
+      .nav-toggle { display: block; }
+      .nav-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s, visibility 0.2s;
+      }
+      .nav-backdrop.open {
+        opacity: 1;
+        visibility: visible;
+      }
+      .nav-links {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        background: var(--surface);
+        z-index: 100;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+        gap: 0.5rem;
+        transform: translateX(-100%);
+        visibility: hidden;
+        transition: transform 0.2s, visibility 0s 0.2s;
+        box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+      }
+      [dir="rtl"] .nav-links {
+        left: auto;
+        right: 0;
+        transform: translateX(100%);
+        box-shadow: -2px 0 12px rgba(0,0,0,0.3);
+      }
+      .nav-links.open {
+        transform: translateX(0);
+        visibility: visible;
+        transition: transform 0.2s, visibility 0s;
+      }
+      .nav-drawer-close {
+        display: block;
+        align-self: flex-end;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text);
+        padding: 0.25rem;
+        line-height: 1;
+      }
+      .nav-links a, .nav-links button, .nav-links form { width: 100%; }
+      .nav-links select.lang-select { width: 100%; }
+      nav .spacer { display: none; }
+      nav .user-name { padding: 0.5rem 0; font-size: 0.9rem; }
+      .container { margin: 1rem auto; }
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .stats { flex-direction: column; }
+      .card { padding: 1rem; }
+    }
   </style>
   <script>
     (function() {
@@ -171,6 +259,10 @@
   <nav>
     <a href="/" class="brand">Gate Bot</a>
     <% if (typeof user !== 'undefined' && user) { %>
+      <button class="nav-toggle" id="navToggle" aria-controls="navLinks" aria-expanded="false" aria-label="Menu">☰</button>
+      <div class="nav-backdrop" id="navBackdrop"></div>
+      <div class="nav-links" id="navLinks">
+      <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">✕</button>
       <a href="/dashboard"><%= t('nav.dashboard') %></a>
       <% if (user.isAdmin) { %>
         <a href="/admin"><%= t('nav.admin') %></a>
@@ -186,6 +278,7 @@
       </form>
       <button class="btn-theme" id="themeToggle" title="Toggle theme"></button>
       <a href="/auth/logout"><%= t('nav.logout') %></a>
+      </div>
     <% } %>
   </nav>
   <div class="container">
@@ -212,6 +305,21 @@
             updateBtn();
           }
         });
+      }
+    })();
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      var backdrop = document.getElementById('navBackdrop');
+      var closeBtn = document.getElementById('navDrawerClose');
+      function openNav() { links.classList.add('open'); backdrop.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); toggle.textContent = '\u2715'; }
+      function closeNav() { links.classList.remove('open'); backdrop.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); toggle.textContent = '\u2630'; }
+      if (toggle && links) {
+        toggle.addEventListener('click', function() {
+          if (links.classList.contains('open')) { closeNav(); } else { openNav(); }
+        });
+        if (backdrop) backdrop.addEventListener('click', closeNav);
+        if (closeBtn) closeBtn.addEventListener('click', closeNav);
       }
     })();
   </script>
