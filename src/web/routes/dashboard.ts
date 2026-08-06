@@ -91,9 +91,9 @@ router.post('/request-access', async (req, res): Promise<void> => {
     return;
   }
 
-  await addPendingRequest({
+  const request = {
     id: `web:${user.id}`,
-    sourceType: 'web',
+    sourceType: 'web' as const,
     sourceUserId: user.id,
     name: user.name,
     email: user.email,
@@ -101,15 +101,17 @@ router.post('/request-access', async (req, res): Promise<void> => {
     lastName: user.lastName,
     picture: user.picture,
     requestedAt: new Date().toISOString(),
-  });
+  };
+
+  await addPendingRequest(request);
 
   await pMap(adminUserIds, (adminId) => {
     sendTelegram(adminId, `Web access request\nName: ${user.name}\nEmail: ${user.email}\nUser ID: ${user.id}`, [
       [
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        { text: 'Allow✅', callback_data: `allow_${user.id}` },
+        { text: 'Allow✅', callback_data: `allow_${request.id}` },
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        { text: 'Deny⛔', callback_data: `deny_${user.id}` },
+        { text: 'Deny⛔', callback_data: `deny_${request.id}` },
       ],
     ]);
   });

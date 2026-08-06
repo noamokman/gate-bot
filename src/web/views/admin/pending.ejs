@@ -20,7 +20,7 @@
             <tr>
               <td><% if (r.picture) { %><img src="<%= r.picture %>" alt="" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"><% } %></td>
               <td>
-                <%= r.name || 'Unknown' %>
+                <%= r.name || t('admin.unknown') %>
                 <% if (r.firstName) { %><br><span style="font-size:0.8rem;color:var(--text-secondary)"><%= r.firstName %><% if (r.lastName) { %> <%= r.lastName %><% } %></span><% } %>
               </td>
               <td><span class="badge badge-<%= r.sourceType %>"><%= r.sourceType %></span></td>

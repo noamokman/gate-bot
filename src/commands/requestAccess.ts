@@ -14,24 +14,29 @@ export const requestAccessCommand = (bot: Telegraf) => {
       return ctx.reply(alreadyAllowed);
     }
 
-    await pMap(adminUserIds, (adminUserId) =>
-      ctx.telegram.sendMessage(
-        adminUserId,
-        `Request recieved\nusername: ${ctx.from.username}\nFull name: ${ctx.from.first_name} ${ctx.from.last_name}\nId: ${userId}`,
-        Markup.inlineKeyboard([Markup.button.callback('Allow✅', `allow_${userId}`), Markup.button.callback('Deny⛔', `deny_${userId}`)]),
-      ),
-    );
-
-    await addPendingRequest({
+    const request = {
       id: `telegram:${userId}`,
-      sourceType: 'telegram',
+      sourceType: 'telegram' as const,
       sourceUserId: userId,
       name: `${ctx.from.first_name} ${ctx.from.last_name ?? ''}`.trim() || ctx.from.username,
       username: ctx.from.username,
       firstName: ctx.from.first_name,
       lastName: ctx.from.last_name,
       requestedAt: new Date().toISOString(),
-    });
+    };
+
+    await addPendingRequest(request);
+
+    await pMap(adminUserIds, (adminUserId) =>
+      ctx.telegram.sendMessage(
+        adminUserId,
+        `Request recieved\nusername: ${ctx.from.username}\nFull name: ${ctx.from.first_name} ${ctx.from.last_name}\nId: ${userId}`,
+        Markup.inlineKeyboard([
+          Markup.button.callback('Allow✅', `allow_${request.id}`),
+          Markup.button.callback('Deny⛔', `deny_${request.id}`),
+        ]),
+      ),
+    );
 
     return ctx.reply(requestSent);
   });

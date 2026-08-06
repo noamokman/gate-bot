@@ -12,17 +12,23 @@ export const openCommand = (bot: Telegraf) => {
       return ctx.reply(notAllowed);
     }
 
-    await addUser({
-      sourceType: 'telegram',
-      id: userId,
-      name: `${ctx.from.first_name} ${ctx.from.last_name ?? ''}`.trim() || ctx.from.username,
-      username: ctx.from.username,
-      firstName: ctx.from.first_name,
-      lastName: ctx.from.last_name,
-    });
-
     try {
-      await open({ userId, username: ctx.from.username, firstName: ctx.from.first_name, lastName: ctx.from.last_name, sourceType: 'telegram' });
+      await addUser({
+        sourceType: 'telegram',
+        id: userId,
+        name: `${ctx.from.first_name} ${ctx.from.last_name ?? ''}`.trim() || ctx.from.username,
+        username: ctx.from.username,
+        firstName: ctx.from.first_name,
+        lastName: ctx.from.last_name,
+      });
+
+      await open({
+        userId,
+        username: ctx.from.username,
+        firstName: ctx.from.first_name,
+        lastName: ctx.from.last_name,
+        sourceType: 'telegram',
+      });
     } catch (error) {
       if (error instanceof Error) {
         return ctx.reply(`${failedToOpen}\n${error.message}`);
