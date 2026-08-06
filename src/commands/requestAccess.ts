@@ -27,6 +27,9 @@ export const requestAccessCommand = (bot: Telegraf) => {
       sourceType: 'telegram',
       sourceUserId: userId,
       name: `${ctx.from.first_name} ${ctx.from.last_name ?? ''}`.trim() || ctx.from.username,
+      username: ctx.from.username,
+      firstName: ctx.from.first_name,
+      lastName: ctx.from.last_name,
       requestedAt: new Date().toISOString(),
     });
 

@@ -57,27 +57,36 @@ router.get('/google/callback', async (req, res): Promise<void> => {
     return;
   }
 
-  const tokens: Record<string, unknown> = await tokenResponse.json();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const tokens: { id_token: string } = await tokenResponse.json() as { id_token: string };
 
-  const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-    headers: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      Authorization: `Bearer ${tokens.access_token as string}`,
-    },
-  });
+  const [, payload] = tokens.id_token.split('.');
 
-  if (!userResponse.ok) {
-    res.status(500).send('Failed to fetch user info');
+  if (!payload) {
+    res.status(500).send('Invalid id_token');
     return;
   }
 
-  const userInfo = (await userResponse.json()) as { id: string; email: string; name: string };
+  const claims = JSON.parse(Buffer.from(payload, 'base64url').toString()) as {
+    sub: string;
+    email: string;
+    name: string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    given_name: string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    family_name: string;
+    picture: string;
+  };
+
   const user = {
     provider: 'google' as const,
-    id: userInfo.id,
-    email: userInfo.email,
-    name: userInfo.name,
-    isAdmin: googleAdminEmails.has(userInfo.email),
+    id: claims.sub,
+    email: claims.email,
+    name: claims.name,
+    firstName: claims.given_name,
+    lastName: claims.family_name,
+    picture: claims.picture,
+    isAdmin: googleAdminEmails.has(claims.email),
   };
 
   // eslint-disable-next-line require-atomic-updates

@@ -1,7 +1,7 @@
 import type { Telegraf } from 'telegraf';
 import pMap from 'p-map';
 import { adminUserIds } from '../framework/environment.js';
-import { addAllowedUser, addWebUser, getPendingRequests, removePendingRequest } from '../services/db.js';
+import { addUser, getPendingRequests, removePendingRequest } from '../services/db.js';
 import { allowed } from '../services/messages.js';
 import { isAdmin } from '../services/authorize.js';
 
@@ -23,7 +23,15 @@ export const allowAction = (bot: Telegraf) => {
     const pending = pendingRequests.find((r) => r.sourceUserId === userId);
 
     if (pending?.sourceType === 'web') {
-      await addWebUser(pending.sourceUserId, { email: pending.email ?? '', name: pending.name ?? '' });
+      await addUser({
+        sourceType: 'web',
+        id: pending.sourceUserId,
+        name: pending.name ?? '',
+        email: pending.email ?? '',
+        firstName: pending.firstName,
+        lastName: pending.lastName,
+        picture: pending.picture,
+      });
 
       await pMap(
         [...adminUserIds].filter((id) => id !== issuingUserId),
@@ -36,12 +44,19 @@ export const allowAction = (bot: Telegraf) => {
 
       await removePendingRequest(pending.id);
     } else {
-      await addAllowedUser(userId);
+      await addUser({
+        sourceType: 'telegram',
+        id: userId,
+        name: pending?.name,
+        username: pending?.username,
+        firstName: pending?.firstName,
+        lastName: pending?.lastName,
+      });
 
       await pMap(
         [...adminUserIds].filter((id) => id !== issuingUserId),
         (adminUserId) =>
-          ctx.telegram.sendMessage(adminUserId, `User ${userId} was allowed to open the gate by ${ctx.from?.first_name}`),
+          ctx.telegram.sendMessage(adminUserId, `User ${pending?.name ?? userId} was allowed to open the gate by ${ctx.from?.first_name}`),
       );
 
       await removePendingRequest(`telegram:${userId}`);
