@@ -35,8 +35,6 @@ export const denyAction = (bot: Telegraf) => {
             `Web user ${pending.name ?? requestId} (${pending.email ?? ''}) was denied access by ${ctx.from?.first_name}`,
           ),
       );
-
-      await removePendingRequest(pending.id);
     } else {
       const userId = pending.sourceUserId;
 
@@ -46,10 +44,10 @@ export const denyAction = (bot: Telegraf) => {
           ctx.telegram.sendMessage(adminUserId, `User ${userId} was denied access to open the gate by ${ctx.from?.first_name}`),
       );
 
-      await removePendingRequest(pending.id);
-
       await ctx.telegram.sendMessage(userId, accessDenied);
     }
+
+    await removePendingRequest(pending.id);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
