@@ -1,10 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 
 type LocaleMap = Record<string, string>;
 
-const dir = dirname(fileURLToPath(import.meta.url));
+const dir = import.meta.dirname;
 
 const supportedLocales = ['en', 'ru', 'he'] as const;
 export type Locale = (typeof supportedLocales)[number];
@@ -63,7 +62,7 @@ export const detectLocale = (acceptLanguage?: string): Locale => {
 
       return { code, priority };
     })
-    .sort((a, b) => b.priority - a.priority);
+    .toSorted((a, b) => b.priority - a.priority);
 
   for (const lang of languages) {
     if (supportedLocales.includes(lang.code as Locale)) {
