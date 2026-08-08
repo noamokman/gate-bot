@@ -81,7 +81,7 @@ router.get('/google/callback', async (req, res): Promise<void> => {
   const tokens = (await tokenResponse.json()) as { id_token?: unknown };
 
   if (typeof tokens.id_token !== 'string') {
-    res.status(400).send('Missing id_token');
+    res.status(401).send('Missing id_token');
     return;
   }
 
