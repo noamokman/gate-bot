@@ -59,6 +59,7 @@ router.post('/pending/:id/allow', async (req, res): Promise<void> => {
       username: request.username,
       firstName: request.firstName,
       lastName: request.lastName,
+      picture: request.picture,
     });
 
     sendTelegram(request.sourceUserId, allowed);
@@ -119,7 +120,7 @@ router.get('/users', (req, res): void => {
         email: u.username ? `@${u.username}` : undefined,
         firstName: u.firstName,
         lastName: u.lastName,
-        picture: undefined as string | undefined,
+        picture: u.picture,
       };
     }
 

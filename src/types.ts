@@ -34,6 +34,7 @@ export interface TelegramUser {
   username?: string;
   firstName?: string;
   lastName?: string;
+  picture?: string;
 }
 
 export interface WebUser {
@@ -70,6 +71,7 @@ export interface TelegramPendingRequest {
   username?: string;
   firstName?: string;
   lastName?: string;
+  picture?: string;
   requestedAt: string;
 }
 

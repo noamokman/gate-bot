@@ -55,6 +55,7 @@ export const allowAction = (bot: Telegraf) => {
         username: pending.username,
         firstName: pending.firstName,
         lastName: pending.lastName,
+        picture: pending.picture,
       });
 
       await pMap(

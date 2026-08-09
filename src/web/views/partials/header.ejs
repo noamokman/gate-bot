@@ -123,6 +123,13 @@
     }
     .badge-telegram { background: #1a3a5c; color: #8bb8f0; }
     .badge-web { background: #1a3a2e; color: #34d399; }
+    .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-inline-end: 0.5rem;
+    }
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
     [dir="rtl"] th, [dir="rtl"] td { text-align: right; }
@@ -268,7 +275,7 @@
         <a href="/admin"><%= t('nav.admin') %></a>
       <% } %>
       <span class="spacer"></span>
-      <span class="user-name"><%= user.name %></span>
+      <span class="user-name"><% if (user.picture) { %><img src="<%= user.picture %>" alt="" class="avatar"><% } %><%= user.name %></span>
       <form method="post" action="/language" style="display:inline">
         <select name="locale" class="lang-select" onchange="this.form.submit()">
           <option value="en" <%= locale === 'en' ? 'selected' : '' %>>English</option>
