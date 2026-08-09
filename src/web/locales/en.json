@@ -46,6 +46,7 @@
     "allow": "Allow",
     "deny": "Deny",
     "remove": "Remove",
+    "unknown": "Unknown",
     "back": "Back to Admin"
   }
 }

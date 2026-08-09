@@ -1,43 +1,39 @@
 import { Low } from 'lowdb';
 // eslint-disable-next-line import-x/extensions
 import { JSONFile } from 'lowdb/node';
-import type { PendingRequest } from '../types.js';
+import type { PendingRequest, User } from '../types.js';
 import { dbPath } from '../framework/environment.js';
 
-interface WebUserRecord {
-  googleId: string;
-  email: string;
-  name: string;
-  allowed: boolean;
-}
-
 interface Schema {
-  allowedUserIds?: string[];
-  webUsers?: Record<string, WebUserRecord>;
+  users?: User[];
   pendingRequests?: PendingRequest[];
 }
 
 const adapter = new JSONFile<Schema>(dbPath);
-const db = new Low(adapter, { allowedUserIds: [] });
+const db = new Low(adapter, { users: [] });
 
 await db.read();
 
-export const isAllowedUser = (userId: string) => !!db.data?.allowedUserIds?.includes(userId);
+export const isUserAllowed = (id: string, sourceType: 'telegram' | 'web') =>
+  (db.data?.users ?? []).some((u) => u.id === id && u.sourceType === sourceType);
 
-export const getAllowedUserIds = () => [...(db.data?.allowedUserIds ?? [])];
-
-export const addAllowedUser = (userId: string) => {
-  if (!db.data?.allowedUserIds) {
-    db.data = { allowedUserIds: [] };
-  }
-
-  db.data.allowedUserIds?.push(userId);
-
-  return db.write();
+export const getUsers = (sourceType?: 'telegram' | 'web') => {
+  const all = db.data?.users ?? [];
+  return sourceType ? all.filter((u) => u.sourceType === sourceType) : [...all];
 };
 
-export const removeAllowedUser = async (userId: string) => {
-  db.data.allowedUserIds = (db.data.allowedUserIds ?? []).filter((id) => id !== userId);
+export const addUser = async (user: User) => {
+  if (!db.data?.users) {
+    db.data = { users: [] };
+  }
+
+  db.data.users = db.data.users?.filter((u) => !(u.id === user.id && u.sourceType === user.sourceType)) ?? [];
+  db.data.users.push(user);
+  await db.write();
+};
+
+export const removeUser = async (id: string, sourceType: 'telegram' | 'web') => {
+  db.data.users = (db.data.users ?? []).filter((u) => !(u.id === id && u.sourceType === sourceType));
   await db.write();
 };
 
@@ -55,24 +51,5 @@ export const removePendingRequest = async (id: string) => {
 };
 
 export const getPendingRequests = () => [...(db.data.pendingRequests ?? [])];
-
-export const addWebUser = async (userId: string, info: { email: string; name: string }) => {
-  if (!db.data.webUsers) {
-    db.data.webUsers = {};
-  }
-  db.data.webUsers[userId] = { googleId: userId, ...info, allowed: true };
-  await db.write();
-};
-
-export const isWebUserAllowed = (userId: string) => db.data.webUsers?.[userId]?.allowed ?? false;
-
-export const getWebUsers = () => Object.values(db.data.webUsers ?? {}).filter((u) => u.allowed);
-
-export const removeWebUser = async (userId: string) => {
-  if (db.data.webUsers) {
-    delete db.data.webUsers[userId];
-  }
-  await db.write();
-};
 
 

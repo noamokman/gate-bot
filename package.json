@@ -21,6 +21,7 @@
     "env-var": "^7.5.0",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "google-auth-library": "^11.0.0",
     "lowdb": "^7.0.1",
     "mqtt": "^5.10.3",
     "p-map": "^7.0.3",

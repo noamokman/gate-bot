@@ -1,6 +1,7 @@
 import type { Telegraf } from 'telegraf';
 import { open } from '../services/open.js';
 import { authorize } from '../services/authorize.js';
+import { addUser } from '../services/db.js';
 import { failedToOpen, notAllowed, opening } from '../services/messages.js';
 
 export const openCommand = (bot: Telegraf) => {
@@ -12,7 +13,22 @@ export const openCommand = (bot: Telegraf) => {
     }
 
     try {
-      await open({ userId, username: ctx.from.username, firstName: ctx.from.first_name, lastName: ctx.from.last_name, sourceType: 'telegram' });
+      await addUser({
+        sourceType: 'telegram',
+        id: userId,
+        name: `${ctx.from.first_name} ${ctx.from.last_name ?? ''}`.trim() || ctx.from.username,
+        username: ctx.from.username,
+        firstName: ctx.from.first_name,
+        lastName: ctx.from.last_name,
+      });
+
+      await open({
+        userId,
+        username: ctx.from.username,
+        firstName: ctx.from.first_name,
+        lastName: ctx.from.last_name,
+        sourceType: 'telegram',
+      });
     } catch (error) {
       if (error instanceof Error) {
         return ctx.reply(`${failedToOpen}\n${error.message}`);

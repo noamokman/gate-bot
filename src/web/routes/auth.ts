@@ -1,9 +1,29 @@
 import crypto from 'node:crypto';
 import { Router } from 'express';
+import { OAuth2Client } from 'google-auth-library';
 import { webConfig as rawWebConfig, basicAuthUsers } from '../../framework/environment.js';
 
 const webConfig = rawWebConfig!;
 const { googleClientId, googleClientSecret, webBaseUrl, googleAdminEmails } = webConfig;
+
+interface RawGoogleIdTokenClaims {
+  iss: string;
+  aud: string;
+  sub: string;
+  email: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  email_verified: boolean;
+  name: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  given_name: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  family_name: string;
+  picture: string;
+  iat: number;
+  exp: number;
+}
+
+const oauthClient = new OAuth2Client(googleClientId, googleClientSecret);
 
 const router = Router();
 
@@ -57,27 +77,38 @@ router.get('/google/callback', async (req, res): Promise<void> => {
     return;
   }
 
-  const tokens: Record<string, unknown> = await tokenResponse.json();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const tokens = (await tokenResponse.json()) as { id_token?: unknown };
 
-  const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-    headers: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      Authorization: `Bearer ${tokens.access_token as string}`,
-    },
-  });
-
-  if (!userResponse.ok) {
-    res.status(500).send('Failed to fetch user info');
+  if (typeof tokens.id_token !== 'string') {
+    res.status(401).send('Missing id_token');
     return;
   }
 
-  const userInfo = (await userResponse.json()) as { id: string; email: string; name: string };
+  let claims: RawGoogleIdTokenClaims;
+
+  try {
+    const ticket = await oauthClient.verifyIdToken({ idToken: tokens.id_token, audience: googleClientId });
+    claims = ticket.getPayload() as RawGoogleIdTokenClaims;
+
+    if (!claims.email_verified) {
+      throw new Error('Email is not verified');
+    }
+  } catch (error) {
+    console.error('Google id_token verification failed:', error);
+    res.status(401).send('Invalid id_token');
+    return;
+  }
+
   const user = {
     provider: 'google' as const,
-    id: userInfo.id,
-    email: userInfo.email,
-    name: userInfo.name,
-    isAdmin: googleAdminEmails.has(userInfo.email),
+    id: claims.sub,
+    email: claims.email,
+    name: claims.name,
+    firstName: claims.given_name,
+    lastName: claims.family_name,
+    picture: claims.picture,
+    isAdmin: googleAdminEmails.has(claims.email),
   };
 
   // eslint-disable-next-line require-atomic-updates

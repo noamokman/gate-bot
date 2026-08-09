@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import pMap from 'p-map';
 import { open } from '../../services/open.js';
-import { isWebUserAllowed, addPendingRequest } from '../../services/db.js';
+import { isUserAllowed, addPendingRequest } from '../../services/db.js';
 import { botToken, adminUserIds, doorCode, parkingInfo, floor, unit, propertyNotes } from '../../framework/environment.js';
 import { failedToOpen, opening, requestSent, alreadyAllowed } from '../../services/messages.js';
 
@@ -33,14 +33,14 @@ const buildPropertyInfo = (allowed: boolean) => ({
 
 router.get('/status', (req, res): void => {
   const user = req.session.user!;
-  const allowed = user.isAdmin || isWebUserAllowed(user.id);
+  const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
 
   res.json({ allowed });
 });
 
 router.get('/', (req, res): void => {
   const user = req.session.user!;
-  const allowed = user.isAdmin || isWebUserAllowed(user.id);
+  const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
 
   res.render('dashboard', {
     user,
@@ -52,7 +52,7 @@ router.get('/', (req, res): void => {
 
 router.post('/open', async (req, res): Promise<void> => {
   const user = req.session.user!;
-  const allowed = user.isAdmin || isWebUserAllowed(user.id);
+  const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
 
   if (!allowed) {
     res.render('dashboard', { user, isAllowed: false, ...buildPropertyInfo(false), message: 'Not authorized' });
@@ -81,27 +81,37 @@ router.post('/open', async (req, res): Promise<void> => {
 router.post('/request-access', async (req, res): Promise<void> => {
   const user = req.session.user!;
 
-  if (user.isAdmin || isWebUserAllowed(user.id)) {
+  if (user.isAdmin || isUserAllowed(user.id, 'web')) {
     res.render('dashboard', { user, isAllowed: true, ...buildPropertyInfo(true), message: alreadyAllowed });
     return;
   }
 
-  await addPendingRequest({
+  if (user.provider !== 'google') {
+    res.status(400).send('Access requests are only supported for Google accounts');
+    return;
+  }
+
+  const request = {
     id: `web:${user.id}`,
-    sourceType: 'web',
+    sourceType: 'web' as const,
     sourceUserId: user.id,
     name: user.name,
     email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    picture: user.picture,
     requestedAt: new Date().toISOString(),
-  });
+  };
+
+  await addPendingRequest(request);
 
   await pMap(adminUserIds, (adminId) => {
     sendTelegram(adminId, `Web access request\nName: ${user.name}\nEmail: ${user.email}\nUser ID: ${user.id}`, [
       [
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        { text: 'Allow✅', callback_data: `allow_${user.id}` },
+        { text: 'Allow✅', callback_data: `allow_${request.id}` },
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        { text: 'Deny⛔', callback_data: `deny_${user.id}` },
+        { text: 'Deny⛔', callback_data: `deny_${request.id}` },
       ],
     ]);
   });

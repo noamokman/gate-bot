@@ -7,6 +7,7 @@
       <table>
         <thead>
           <tr>
+            <th></th>
             <th><%= t('admin.name') %></th>
             <th><%= t('admin.source') %></th>
             <th><%= t('admin.contact') %></th>
@@ -17,9 +18,13 @@
         <tbody>
           <% pendingRequests.forEach(function(r) { %>
             <tr>
-              <td><%= r.name || 'Unknown' %></td>
+              <td><% if (r.picture) { %><img src="<%= r.picture %>" alt="" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"><% } %></td>
+              <td>
+                <%= r.name || t('admin.unknown') %>
+                <% if (r.firstName) { %><br><span style="font-size:0.8rem;color:var(--text-secondary)"><%= r.firstName %><% if (r.lastName) { %> <%= r.lastName %><% } %></span><% } %>
+              </td>
               <td><span class="badge badge-<%= r.sourceType %>"><%= r.sourceType %></span></td>
-              <td><%= r.email || r.sourceUserId %></td>
+              <td><%= r.email || (r.username ? '@' + r.username : '') || r.sourceUserId %></td>
               <td><%= new Date(r.requestedAt).toLocaleString() %></td>
               <td>
                 <form method="post" action="/admin/pending/<%= r.id %>/allow" class="inline">

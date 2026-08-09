@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
+import type { WebSessionUser } from '../types.js';
 
 declare module 'express-session' {
   interface SessionData {
-    user?: { provider: 'google' | 'password'; id: string; email: string; name: string; isAdmin: boolean };
+    user?: WebSessionUser;
     oauthState?: string;
     locale?: string;
   }

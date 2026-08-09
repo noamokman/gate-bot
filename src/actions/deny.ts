@@ -13,37 +13,41 @@ export const denyAction = (bot: Telegraf) => {
       return ctx.reply('You are not allowed to do this');
     }
 
-    const userId = ctx.match?.[1];
+    const requestId = ctx.match?.[1];
 
-    if (!userId) {
+    if (!requestId) {
       return ctx.reply('Something went wrong');
     }
 
     const pendingRequests = getPendingRequests();
-    const pending = pendingRequests.find((r) => r.sourceUserId === userId);
+    const pending = pendingRequests.find((r) => r.id === requestId);
 
-    if (pending?.sourceType === 'web') {
+    if (!pending) {
+      return ctx.reply('This request is no longer pending');
+    }
+
+    if (pending.sourceType === 'web') {
       await pMap(
         [...adminUserIds].filter((id) => id !== issuingUserId),
         (adminUserId) =>
           ctx.telegram.sendMessage(
             adminUserId,
-            `Web user ${pending.name ?? userId} (${pending.email ?? ''}) was denied access by ${ctx.from?.first_name}`,
+            `Web user ${pending.name ?? requestId} (${pending.email ?? ''}) was denied access by ${ctx.from?.first_name}`,
           ),
       );
-
-      await removePendingRequest(pending.id);
     } else {
+      const userId = pending.sourceUserId;
+
       await pMap(
         [...adminUserIds].filter((id) => id !== issuingUserId),
         (adminUserId) =>
           ctx.telegram.sendMessage(adminUserId, `User ${userId} was denied access to open the gate by ${ctx.from?.first_name}`),
       );
 
-      await removePendingRequest(`telegram:${userId}`);
-
       await ctx.telegram.sendMessage(userId, accessDenied);
     }
+
+    await removePendingRequest(pending.id);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });

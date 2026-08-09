@@ -1,14 +1,11 @@
 import { Router } from 'express';
 import pMap from 'p-map';
 import {
-  addAllowedUser,
-  removeAllowedUser,
-  getAllowedUserIds,
+  addUser,
+  removeUser,
+  getUsers,
   getPendingRequests,
   removePendingRequest,
-  addWebUser,
-  removeWebUser,
-  getWebUsers,
 } from '../../services/db.js';
 import { botToken, adminUserIds } from '../../framework/environment.js';
 import { allowed, accessDenied } from '../../services/messages.js';
@@ -26,7 +23,7 @@ const sendTelegram = (chatId: string, text: string) => {
 
 router.get('/', (req, res): void => {
   const pendingCount = getPendingRequests().length;
-  const allowedCount = getWebUsers().length + getAllowedUserIds().length;
+  const allowedCount = getUsers().length;
 
   res.render('admin/dashboard', {
     user: req.session.user,
@@ -55,7 +52,14 @@ router.post('/pending/:id/allow', async (req, res): Promise<void> => {
   const adminEmail = req.session.user!.email;
 
   if (request.sourceType === 'telegram') {
-    await addAllowedUser(request.sourceUserId);
+    await addUser({
+      sourceType: 'telegram',
+      id: request.sourceUserId,
+      name: request.name,
+      username: request.username,
+      firstName: request.firstName,
+      lastName: request.lastName,
+    });
 
     sendTelegram(request.sourceUserId, allowed);
 
@@ -63,7 +67,15 @@ router.post('/pending/:id/allow', async (req, res): Promise<void> => {
       sendTelegram(adminId, `User ${request.name ?? request.sourceUserId} was allowed by ${adminName} (${adminEmail}) via web admin`);
     });
   } else {
-    await addWebUser(request.sourceUserId, { email: request.email ?? '', name: request.name ?? '' });
+    await addUser({
+      sourceType: 'web',
+      id: request.sourceUserId,
+      name: request.name ?? '',
+      email: request.email ?? '',
+      firstName: request.firstName,
+      lastName: request.lastName,
+      picture: request.picture,
+    });
   }
 
   await removePendingRequest(id);
@@ -98,20 +110,29 @@ router.post('/pending/:id/deny', async (req, res): Promise<void> => {
 });
 
 router.get('/users', (req, res): void => {
-  const telegramUsers = getAllowedUserIds().map((id) => ({
-    sourceType: 'telegram' as const,
-    sourceUserId: id,
-    name: id,
-    email: undefined as string | undefined,
-  }));
-  const webUsersList = getWebUsers().map((u) => ({
-    sourceType: 'web' as const,
-    sourceUserId: u.googleId,
-    name: u.name,
-    email: u.email,
-  }));
+  const allowedUsers = getUsers().map((u) => {
+    if (u.sourceType === 'telegram') {
+      return {
+        sourceType: 'telegram' as const,
+        sourceUserId: u.id,
+        name: u.name ?? u.username ?? u.id,
+        email: u.username ? `@${u.username}` : undefined,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        picture: undefined as string | undefined,
+      };
+    }
 
-  const allowedUsers = [...telegramUsers, ...webUsersList];
+    return {
+      sourceType: 'web' as const,
+      sourceUserId: u.id,
+      name: u.name,
+      email: u.email,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      picture: u.picture,
+    };
+  });
 
   res.render('admin/users', { user: req.session.user, allowedUsers });
 });
@@ -119,7 +140,7 @@ router.get('/users', (req, res): void => {
 router.post('/users/:sourceType/:id/remove', async (req, res): Promise<void> => {
   const { sourceType, id } = req.params;
 
-  await (sourceType === 'telegram' ? removeAllowedUser(id) : removeWebUser(id));
+  await removeUser(id, sourceType as 'telegram' | 'web');
 
   res.redirect('/admin/users');
 });

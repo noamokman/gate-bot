@@ -7,6 +7,7 @@
       <table>
         <thead>
           <tr>
+            <th></th>
             <th><%= t('admin.name') %></th>
             <th><%= t('admin.source') %></th>
             <th><%= t('admin.contact') %></th>
@@ -16,7 +17,11 @@
         <tbody>
           <% allowedUsers.forEach(function(u) { %>
             <tr>
-              <td><%= u.name %></td>
+              <td><% if (u.picture) { %><img src="<%= u.picture %>" alt="" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"><% } %></td>
+              <td>
+                <%= u.name %>
+                <% if (u.firstName) { %><br><span style="font-size:0.8rem;color:var(--text-secondary)"><%= u.firstName %><% if (u.lastName) { %> <%= u.lastName %><% } %></span><% } %>
+              </td>
               <td><span class="badge badge-<%= u.sourceType %>"><%= u.sourceType %></span></td>
               <td><%= u.email || u.sourceUserId %></td>
               <td>

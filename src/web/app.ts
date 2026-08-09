@@ -1,5 +1,4 @@
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import express from 'express';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
@@ -12,7 +11,7 @@ import { detectLocale, t } from './locales/index.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const FileStore = sessionFileStore(session);
-const viewsDir = join(dirname(fileURLToPath(import.meta.url)), 'views');
+const viewsDir = join(import.meta.dirname, 'views');
 
 export const startWebServer = () => {
   if (!webConfig) {
