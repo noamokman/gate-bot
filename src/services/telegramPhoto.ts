@@ -1,9 +1,11 @@
 import type { Telegram } from 'telegraf';
 import { botToken } from '../framework/environment.js';
 
+const PHOTO_TIMEOUT_MS = 10_000;
+
 export const getTelegramProfilePhoto = async (telegram: Telegram, userId: number): Promise<string | undefined> => {
   try {
-    const { photos } = await telegram.getUserProfilePhotos(userId);
+    const { photos } = await telegram.getUserProfilePhotos(userId, 0, 1);
     const photo = photos[0]?.[0];
 
     if (!photo) {
@@ -16,9 +18,12 @@ export const getTelegramProfilePhoto = async (telegram: Telegram, userId: number
       return undefined;
     }
 
-    const response = await fetch(`https://api.telegram.org/file/bot${botToken}/${file.file_path}`);
+    const response = await fetch(`https://api.telegram.org/file/bot${botToken}/${file.file_path}`, {
+      signal: AbortSignal.timeout(PHOTO_TIMEOUT_MS),
+    });
 
     if (!response.ok) {
+      await response.body?.cancel();
       return undefined;
     }
 
