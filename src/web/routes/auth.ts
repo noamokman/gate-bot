@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { Router } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import { webConfig as rawWebConfig, basicAuthUsers } from '../../framework/environment.js';
+import { updateUser } from '../../services/db.js';
 
 const webConfig = rawWebConfig!;
 const { googleClientId, googleClientSecret, webBaseUrl, googleAdminEmails } = webConfig;
@@ -110,6 +111,16 @@ router.get('/google/callback', async (req, res): Promise<void> => {
     picture: claims.picture,
     isAdmin: googleAdminEmails.has(claims.email),
   };
+
+  await updateUser({
+    sourceType: 'web',
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    picture: user.picture,
+  });
 
   // eslint-disable-next-line require-atomic-updates
   req.session.user = user;

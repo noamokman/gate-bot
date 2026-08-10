@@ -37,6 +37,61 @@ export const removeUser = async (id: string, sourceType: 'telegram' | 'web') => 
   await db.write();
 };
 
+const mergeUser = (existing: User, incoming: User): User => {
+  switch (incoming.sourceType) {
+    case 'web': {
+      if (existing.sourceType !== 'web') {
+        return existing;
+      }
+
+      return {
+        sourceType: 'web',
+        id: existing.id,
+        name: incoming.name ?? existing.name,
+        email: incoming.email ?? existing.email,
+        firstName: incoming.firstName ?? existing.firstName,
+        lastName: incoming.lastName ?? existing.lastName,
+        picture: incoming.picture ?? existing.picture,
+      };
+    }
+    case 'telegram': {
+      if (existing.sourceType !== 'telegram') {
+        return existing;
+      }
+
+      return {
+        sourceType: 'telegram',
+        id: existing.id,
+        name: incoming.name ?? existing.name,
+        username: incoming.username ?? existing.username,
+        firstName: incoming.firstName ?? existing.firstName,
+        lastName: incoming.lastName ?? existing.lastName,
+        picture: incoming.picture ?? existing.picture,
+      };
+    }
+  }
+};
+
+export const updateUser = async (user: User) => {
+  const users = db.data?.users ?? [];
+
+  const index = users.findIndex((u) => u.id === user.id && u.sourceType === user.sourceType);
+
+  if (index === -1) {
+    return;
+  }
+
+  const existing = users[index];
+
+  if (!existing) {
+    return;
+  }
+
+  users[index] = mergeUser(existing, user);
+  db.data.users = users;
+  await db.write();
+};
+
 export const addPendingRequest = async (request: PendingRequest) => {
   db.data.pendingRequests = (db.data.pendingRequests ?? []).filter(
     (r) => !(r.sourceType === request.sourceType && r.sourceUserId === request.sourceUserId),
