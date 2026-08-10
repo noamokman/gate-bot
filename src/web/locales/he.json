@@ -19,6 +19,7 @@
     "signedInAs": "מחובר כ",
     "authorized": "יש לך הרשאה לפתוח את השער.",
     "openGate": "פתח שער",
+    "openFailed": "הפתיחה נכשלה. נסה שוב.",
     "doorCode": "קוד שער",
     "notAuthorized": "אין לך הרשאה לפתוח את השער.",
     "requestAccess": "בקש גישה",

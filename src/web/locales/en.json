@@ -19,6 +19,7 @@
     "signedInAs": "Signed in as",
     "authorized": "You are authorized to open the gate.",
     "openGate": "Open Gate",
+    "openFailed": "Failed to open the gate. Please try again.",
     "doorCode": "Door Code",
     "notAuthorized": "You are not authorized to open the gate.",
     "requestAccess": "Request Access",

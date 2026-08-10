@@ -55,7 +55,7 @@ router.post('/open', async (req, res): Promise<void> => {
   const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
 
   if (!allowed) {
-    res.render('dashboard', { user, isAllowed: false, ...buildPropertyInfo(false), message: 'Not authorized' });
+    res.status(403).json({ ok: false, message: 'Not authorized' });
     return;
   }
 
@@ -67,12 +67,10 @@ router.post('/open', async (req, res): Promise<void> => {
       sourceType: 'web',
     });
 
-    res.render('dashboard', { user, isAllowed: true, ...buildPropertyInfo(true), message: opening });
+    res.json({ ok: true, message: opening });
   } catch (error) {
-    res.render('dashboard', {
-      user,
-      isAllowed: true,
-      ...buildPropertyInfo(true),
+    res.status(500).json({
+      ok: false,
       message: error instanceof Error ? `${failedToOpen}\n${error.message}` : failedToOpen,
     });
   }

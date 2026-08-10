@@ -8,9 +8,10 @@
     <p><%= t('dashboard.signedInAs') %> <strong><%= user.name %></strong> (<%= user.email %>)</p>
     <% if (isAllowed) { %>
       <div class="message message-success"><%= t('dashboard.authorized') %></div>
-      <form method="post" action="/dashboard/open">
-        <button type="submit" class="btn"><%= t('dashboard.openGate') %></button>
+      <form method="post" action="/dashboard/open" id="openForm">
+        <button type="submit" class="btn" id="openBtn"><%= t('dashboard.openGate') %></button>
       </form>
+      <div id="openMessage" style="display:none; white-space: pre-wrap;" class="message"></div>
     <% } else { %>
       <div class="message message-error"><%= t('dashboard.notAuthorized') %></div>
       <form method="post" action="/dashboard/request-access">
@@ -30,6 +31,37 @@
         <% if (propertyNotes) { %><tr><td><strong><%= t('dashboard.infoNotes') %></strong></td><td style="white-space: pre-wrap;"><%= propertyNotes %></td></tr><% } %>
       </table>
     </div>
+  <% } %>
+
+  <% if (isAllowed) { %>
+  <script>
+    (function() {
+      var form = document.getElementById('openForm');
+      var btn = document.getElementById('openBtn');
+      var messageEl = document.getElementById('openMessage');
+      if (!form || !btn || !messageEl) return;
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        btn.disabled = true;
+
+        fetch('/dashboard/open', { method: 'POST' })
+          .then(function(r) { return r.json().catch(function() { return {}; }).then(function(data) { return { ok: r.ok && data.ok, data: data }; }); })
+          .then(function(result) {
+            messageEl.className = 'message ' + (result.ok ? 'message-success' : 'message-error');
+            messageEl.textContent = result.data.message || '';
+            messageEl.style.display = '';
+          })
+          .catch(function() {
+            messageEl.className = 'message message-error';
+            messageEl.textContent = '<%= t('dashboard.openFailed') %>';
+          })
+          .finally(function() {
+            btn.disabled = false;
+          });
+      });
+    })();
+  </script>
   <% } %>
 
   <% if (!isAllowed) { %>
