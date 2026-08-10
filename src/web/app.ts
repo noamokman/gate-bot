@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import express from 'express';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
-import { webConfig, basicAuthUsers } from '../framework/environment.js';
+import { webConfig } from '../framework/environment.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { adminRouter } from './routes/admin.js';
@@ -74,19 +74,8 @@ export const startWebServer = () => {
   });
 
   app.use('/auth', authRouter);
-  app.use('/dashboard', ensureAuth, dashboardRouter);
+  app.use('/', dashboardRouter);
   app.use('/admin', ensureAuth, ensureAdmin, adminRouter);
-
-  app.get('/', (req, res) => {
-    if (req.session.user) {
-      res.redirect('/dashboard');
-      return;
-    }
-
-    const error = req.query.error as string | undefined;
-
-    res.render('login', { showPasswordLogin: basicAuthUsers.length > 0, error });
-  });
 
   app.listen(webPort, () => {
     console.log(`Web server started on port ${webPort}`);

@@ -8,13 +8,13 @@
     <p><%= t('dashboard.signedInAs') %> <strong><%= user.name %></strong> (<%= user.email %>)</p>
     <% if (isAllowed) { %>
       <div class="message message-success"><%= t('dashboard.authorized') %></div>
-      <form method="post" action="/dashboard/open" id="openForm">
+      <form method="post" action="/open" id="openForm">
         <button type="submit" class="btn" id="openBtn"><%= t('dashboard.openGate') %></button>
       </form>
       <div id="openMessage" style="display:none; white-space: pre-wrap;" class="message"></div>
     <% } else { %>
       <div class="message message-error"><%= t('dashboard.notAuthorized') %></div>
-      <form method="post" action="/dashboard/request-access">
+      <form method="post" action="/request-access">
         <button type="submit" class="btn"><%= t('dashboard.requestAccess') %></button>
       </form>
     <% } %>
@@ -45,9 +45,17 @@
         e.preventDefault();
         btn.disabled = true;
 
-        fetch('/dashboard/open', { method: 'POST' })
-          .then(function(r) { return r.json().catch(function() { return {}; }).then(function(data) { return { ok: r.ok && data.ok, data: data }; }); })
+        fetch('/open', { method: 'POST' })
+          .then(function(r) {
+            var contentType = r.headers.get('content-type') || '';
+            if (contentType.indexOf('application/json') === -1) {
+              window.location.href = '/';
+              return null;
+            }
+            return r.json().then(function(data) { return { ok: r.ok && data.ok, data: data }; });
+          })
           .then(function(result) {
+            if (!result) return;
             messageEl.className = 'message ' + (result.ok ? 'message-success' : 'message-error');
             messageEl.textContent = result.data.message || '';
             messageEl.style.display = '';
@@ -71,10 +79,18 @@
       var pollId;
 
       function checkAuth() {
-        fetch('/dashboard/status')
-          .then(function(r) { return r.json(); })
+        fetch('/status')
+          .then(function(r) {
+            var contentType = r.headers.get('content-type') || '';
+            if (contentType.indexOf('application/json') === -1) {
+              clearInterval(pollId);
+              window.location.href = '/';
+              return null;
+            }
+            return r.json();
+          })
           .then(function(data) {
-            if (data.allowed) {
+            if (data && data.allowed) {
               clearInterval(pollId);
               location.reload();
             }
