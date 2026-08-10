@@ -55,6 +55,7 @@
           .catch(function() {
             messageEl.className = 'message message-error';
             messageEl.textContent = '<%= t('dashboard.openFailed') %>';
+            messageEl.style.display = '';
           })
           .finally(function() {
             btn.disabled = false;
