@@ -112,10 +112,9 @@ The web server is started automatically when the Google OAuth environment variab
 
 | Feature | URL | Access |
 |---|---|---|
-| Login | `/` → Sign in with Google | Public |
-| Dashboard | `/dashboard` | Any authenticated user |
-| Open Gate | `/dashboard` (Open Gate button) | Authorized users |
-| Property Info | `/dashboard` (info card) | Authorized users |
+| Login / Dashboard | `/` (dashboard shown when signed in) | Any authenticated user |
+| Open Gate | `/` (Open Gate button) | Authorized users |
+| Property Info | `/` (info card) | Authorized users |
 | Admin Panel | `/admin` | Users with email in `GOOGLE_ADMIN_EMAILS` |
 | Pending Requests | `/admin/pending` | Admins |
 | Manage Users | `/admin/users` | Admins |

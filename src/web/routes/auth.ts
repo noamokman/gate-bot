@@ -125,7 +125,7 @@ router.get('/google/callback', async (req, res): Promise<void> => {
   // eslint-disable-next-line require-atomic-updates
   req.session.user = user;
 
-  res.redirect('/dashboard');
+  res.redirect('/');
 });
 
 router.post('/password', (req, res): void => {
@@ -156,7 +156,7 @@ router.post('/password', (req, res): void => {
     isAdmin: match.isAdmin,
   };
 
-  res.redirect('/dashboard');
+  res.redirect('/');
 });
 
 router.get('/logout', (req, res): void => {

@@ -2,8 +2,9 @@ import { Router } from 'express';
 import pMap from 'p-map';
 import { open } from '../../services/open.js';
 import { isUserAllowed, addPendingRequest } from '../../services/db.js';
-import { botToken, adminUserIds, doorCode, parkingInfo, floor, unit, propertyNotes } from '../../framework/environment.js';
+import { botToken, adminUserIds, doorCode, parkingInfo, floor, unit, propertyNotes, basicAuthUsers } from '../../framework/environment.js';
 import { failedToOpen, opening, requestSent, alreadyAllowed } from '../../services/messages.js';
+import { ensureAuth } from '../middleware.js';
 
 const router = Router();
 
@@ -31,15 +32,16 @@ const buildPropertyInfo = (allowed: boolean) => ({
   propertyNotes: allowed && propertyNotes ? propertyNotes : null,
 });
 
-router.get('/status', (req, res): void => {
-  const user = req.session.user!;
-  const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
-
-  res.json({ allowed });
-});
-
 router.get('/', (req, res): void => {
-  const user = req.session.user!;
+  const { user } = req.session;
+
+  if (!user) {
+    const error = req.query.error as string | undefined;
+
+    res.render('login', { showPasswordLogin: basicAuthUsers.length > 0, error });
+    return;
+  }
+
   const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
 
   res.render('dashboard', {
@@ -50,7 +52,14 @@ router.get('/', (req, res): void => {
   });
 });
 
-router.post('/open', async (req, res): Promise<void> => {
+router.get('/status', ensureAuth, (req, res): void => {
+  const user = req.session.user!;
+  const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
+
+  res.json({ allowed });
+});
+
+router.post('/open', ensureAuth, async (req, res): Promise<void> => {
   const user = req.session.user!;
   const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
 
@@ -76,7 +85,7 @@ router.post('/open', async (req, res): Promise<void> => {
   }
 });
 
-router.post('/request-access', async (req, res): Promise<void> => {
+router.post('/request-access', ensureAuth, async (req, res): Promise<void> => {
   const user = req.session.user!;
 
   if (user.isAdmin || isUserAllowed(user.id, 'web')) {
