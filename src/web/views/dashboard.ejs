@@ -11,7 +11,7 @@
       <form method="post" action="/open" id="openForm">
         <button type="submit" class="btn" id="openBtn"><%= t('dashboard.openGate') %></button>
       </form>
-      <div id="openMessage" style="display:none; white-space: pre-wrap;" class="message"></div>
+      <div id="openMessage" style="display:none; margin-top: 1rem; white-space: pre-wrap;" class="message"></div>
     <% } else { %>
       <div class="message message-error"><%= t('dashboard.notAuthorized') %></div>
       <form method="post" action="/request-access">
@@ -39,7 +39,18 @@
       var form = document.getElementById('openForm');
       var btn = document.getElementById('openBtn');
       var messageEl = document.getElementById('openMessage');
+      var messageTimer;
       if (!form || !btn || !messageEl) return;
+
+      function showMessage(ok, text) {
+        messageEl.className = 'message ' + (ok ? 'message-success' : 'message-error');
+        messageEl.textContent = text || '';
+        messageEl.style.display = '';
+        clearTimeout(messageTimer);
+        messageTimer = setTimeout(function() {
+          messageEl.style.display = 'none';
+        }, 5000);
+      }
 
       form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -56,14 +67,10 @@
           })
           .then(function(result) {
             if (!result) return;
-            messageEl.className = 'message ' + (result.ok ? 'message-success' : 'message-error');
-            messageEl.textContent = result.data.message || '';
-            messageEl.style.display = '';
+            showMessage(result.ok, result.data.message || '');
           })
           .catch(function() {
-            messageEl.className = 'message message-error';
-            messageEl.textContent = '<%= t('dashboard.openFailed') %>';
-            messageEl.style.display = '';
+            showMessage(false, '<%= t('dashboard.openFailed') %>');
           })
           .finally(function() {
             btn.disabled = false;
