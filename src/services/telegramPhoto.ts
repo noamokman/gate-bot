@@ -1,7 +1,38 @@
+import { readFile } from 'node:fs/promises';
 import type { Telegram } from 'telegraf';
-import { botToken } from '../framework/environment.js';
+import { botToken, logoJpgPath } from '../framework/environment.js';
 
 const PHOTO_TIMEOUT_MS = 10_000;
+
+export const setBotPhotoIfMissing = async (telegram: Telegram): Promise<void> => {
+  try {
+    const me = await telegram.getMe();
+    const chat = await telegram.getChat(me.id);
+
+    if (chat.photo) {
+      return;
+    }
+
+    const form = new FormData();
+    form.append('photo', JSON.stringify({ type: 'static', photo: 'attach://photo' }));
+    form.append('photo', new Blob([await readFile(logoJpgPath)], { type: 'image/jpeg' }), 'logo.jpg');
+
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/setMyProfilePhoto`, {
+      method: 'POST',
+      body: form,
+      signal: AbortSignal.timeout(PHOTO_TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      const error = (await response.json().catch(() => null)) as { description?: string } | null;
+      throw new Error(error?.description ?? `Telegram API responded with status ${response.status}`);
+    }
+
+    console.log('Bot profile photo set');
+  } catch (error) {
+    console.error('Failed to set bot profile photo', error);
+  }
+};
 
 export const getTelegramProfilePhoto = async (telegram: Telegram, userId: number): Promise<string | undefined> => {
   try {
@@ -30,7 +61,8 @@ export const getTelegramProfilePhoto = async (telegram: Telegram, userId: number
     const buffer = Buffer.from(await response.arrayBuffer());
 
     return `data:image/jpeg;base64,${buffer.toString('base64')}`;
-  } catch {
+  } catch (error) {
+    console.error('Failed to get Telegram profile photo', error);
     return undefined;
   }
 };

@@ -1,5 +1,9 @@
 # gate-bot
 
+<p align="center">
+  <img src="src/web/assets/logo.png" alt="Gate Bot logo" width="128">
+</p>
+
 This is a Telegram bot and web UI that allows authorized users to open a gate. It uses the Telegraf framework for Telegram bot development and supports both HTTP and MQTT for integration with Home Assistant.
 
 ## Features

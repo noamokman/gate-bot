@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import express from 'express';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
-import { webConfig } from '../framework/environment.js';
+import { logoPath, webConfig } from '../framework/environment.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { adminRouter } from './routes/admin.js';
@@ -71,6 +71,10 @@ export const startWebServer = () => {
     }
 
     res.redirect(req.headers.referer ?? '/');
+  });
+
+  app.get('/logo.png', (_req, res) => {
+    res.sendFile(logoPath);
   });
 
   app.use('/auth', authRouter);

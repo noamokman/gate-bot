@@ -45,7 +45,8 @@
       align-items: center;
       gap: 1.5rem;
     }
-    nav .brand { font-weight: 600; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+    nav .brand { font-weight: 600; font-size: 1.1rem; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+    nav .brand img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
     nav a { color: var(--primary); text-decoration: none; font-size: 0.9rem; }
     nav a:hover { text-decoration: underline; }
     nav .spacer { flex: 1; }
@@ -264,7 +265,7 @@
 </head>
 <body>
   <nav>
-    <a href="/" class="brand">Gate Bot</a>
+    <a href="/" class="brand"><img src="/logo.png" alt="Gate Bot logo">Gate Bot</a>
     <% if (typeof user !== 'undefined' && user) { %>
       <button class="nav-toggle" id="navToggle" aria-controls="navLinks" aria-expanded="false" aria-label="Menu">☰</button>
       <div class="nav-backdrop" id="navBackdrop"></div>
