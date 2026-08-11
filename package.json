@@ -9,7 +9,7 @@
     "format": "prettier --write .",
     "lint": "yarn lint:base --fix",
     "lint:base": "eslint .",
-    "build": "tsc && rm -rf dist/web/views && cp -r src/web/views dist/web/views && cp src/web/locales/*.json dist/web/locales/",
+    "build": "tsc && rm -rf dist/web/views && cp -r src/web/views dist/web/views && cp src/web/locales/*.json dist/web/locales/ && cp -r src/web/assets dist/web/assets",
     "start": "nodemon"
   },
   "keywords": [],

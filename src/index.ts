@@ -6,6 +6,7 @@ import { message } from 'telegraf/filters';
 import { botToken, webConfig } from './framework/environment.js';
 import { authorizeContext } from './services/authorize.js';
 import { allowed, helpAllowed, notAllowed, welcome } from './services/messages.js';
+import { setBotPhotoIfMissing } from './services/telegramPhoto.js';
 import { openCommand } from './commands/open.js';
 import { requestAccessCommand } from './commands/requestAccess.js';
 import { checkAuthorizationCommand } from './commands/checkAuthorization.js';
@@ -40,6 +41,8 @@ await bot.telegram.setMyCommands([
   { command: 'info', description: 'View property info (door code, parking, floor, unit, notes)' },
   { command: 'version', description: 'Show the current version' },
 ]);
+
+await setBotPhotoIfMissing(bot.telegram);
 
 process.once('SIGINT', () => {
   bot.stop('SIGINT');
