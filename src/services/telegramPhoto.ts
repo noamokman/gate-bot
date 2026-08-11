@@ -20,6 +20,7 @@ export const setBotPhotoIfMissing = async (telegram: Telegram): Promise<void> =>
     const response = await fetch(`https://api.telegram.org/bot${botToken}/setMyProfilePhoto`, {
       method: 'POST',
       body: form,
+      signal: AbortSignal.timeout(PHOTO_TIMEOUT_MS),
     });
 
     if (!response.ok) {
