@@ -5,19 +5,15 @@
     <p style="margin-bottom: 1.5rem;"><%= t('login.subtitle') %></p>
 
     <% if (typeof showPasswordLogin !== 'undefined' && showPasswordLogin) { %>
-      <% if (typeof error !== 'undefined' && error === 'invalid') { %>
-        <div class="message message-error"><%= t('login.invalidCredentials') %></div>
-      <% } else if (typeof error !== 'undefined' && error === 'missing') { %>
-        <div class="message message-error"><%= t('login.missingCredentials') %></div>
-      <% } %>
-      <form method="post" action="/auth/password" style="margin-bottom: 1.5rem;">
+      <div id="loginError" class="message message-error" style="display: none;"></div>
+      <form id="loginForm" style="margin-bottom: 1.5rem;">
         <div style="margin-bottom: 0.75rem;">
-          <input type="text" name="username" placeholder="<%= t('login.username') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
+          <input type="text" id="username" placeholder="<%= t('login.username') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
         </div>
         <div style="margin-bottom: 0.75rem;">
-          <input type="password" name="password" placeholder="<%= t('login.password') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
+          <input type="password" id="password" placeholder="<%= t('login.password') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
         </div>
-        <button type="submit" class="btn" style="width: 100%; justify-content: center;"><%= t('login.signInPassword') %></button>
+        <button type="submit" class="btn" id="loginBtn" style="width: 100%; justify-content: center;"><%= t('login.signInPassword') %></button>
       </form>
       <div style="border-top: 1px solid var(--border); margin: 1.5rem 0;"></div>
     <% } %>
@@ -27,4 +23,49 @@
       <%= t('login.signIn') %>
     </a>
   </div>
+  <% if (typeof showPasswordLogin !== 'undefined' && showPasswordLogin) { %>
+  <script>
+    (function() {
+      var form = document.getElementById('loginForm');
+      var btn = document.getElementById('loginBtn');
+      var errorEl = document.getElementById('loginError');
+      if (!form) return;
+
+      function showError(text) {
+        errorEl.textContent = text;
+        errorEl.style.display = '';
+      }
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        btn.disabled = true;
+        errorEl.style.display = 'none';
+
+        var body = new URLSearchParams();
+        body.set('username', document.getElementById('username').value);
+        body.set('password', document.getElementById('password').value);
+
+        fetch('/api/auth/password', { method: 'POST', body: body })
+          .then(function(r) { return r.json().then(function(d) { return { ok: r.ok && d.ok, data: d }; }); })
+          .then(function(result) {
+            if (result.ok) {
+              window.location.href = '/';
+              return;
+            }
+            if (result.data && result.data.error === 'missing') {
+              showError('<%= t('login.missingCredentials') %>');
+            } else {
+              showError('<%= t('login.invalidCredentials') %>');
+            }
+          })
+          .catch(function() {
+            showError('<%= t('login.invalidCredentials') %>');
+          })
+          .finally(function() {
+            btn.disabled = false;
+          });
+      });
+    })();
+  </script>
+  <% } %>
 <%- include('partials/footer') %>

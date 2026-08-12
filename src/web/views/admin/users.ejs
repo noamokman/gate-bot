@@ -25,9 +25,7 @@
               <td><span class="badge badge-<%= u.sourceType %>"><%= u.sourceType %></span></td>
               <td><%= u.email || u.sourceUserId %></td>
               <td>
-                <form method="post" action="/admin/users/<%= u.sourceType %>/<%= u.sourceUserId %>/remove" class="inline">
-                  <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.remove') %></button>
-                </form>
+                <button type="button" class="btn btn-danger" data-action="/api/admin/users/<%= u.sourceType %>/<%= u.sourceUserId %>/remove" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.remove') %></button>
               </td>
             </tr>
           <% }) %>
@@ -36,4 +34,22 @@
     <% } %>
   </div>
   <a href="/admin">&larr; <%= t('admin.back') %></a>
+  <script>
+    (function() {
+      var buttons = document.querySelectorAll('[data-action]');
+      buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          btn.disabled = true;
+          fetch(btn.getAttribute('data-action'), { method: 'POST' })
+            .then(function(r) {
+              if (!r.ok) throw new Error('failed');
+              location.reload();
+            })
+            .catch(function() {
+              btn.disabled = false;
+            });
+        });
+      });
+    })();
+  </script>
 <%- include('../partials/footer') %>

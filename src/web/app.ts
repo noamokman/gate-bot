@@ -6,6 +6,7 @@ import { webConfig } from '../framework/environment.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { adminRouter } from './routes/admin.js';
+import { apiRouter } from './routes/api.js';
 import { ensureAuth, ensureAdmin } from './middleware.js';
 import { detectLocale, t } from './locales/index.js';
 
@@ -25,7 +26,10 @@ export const startWebServer = () => {
   app.set('view engine', 'ejs');
   app.set('views', viewsDir);
 
+  app.use('/assets', express.static(join(import.meta.dirname, 'assets')));
+
   app.use(express.urlencoded({ extended: true }));
+
   app.use(
     session({
       secret: webSessionSecret,
@@ -53,29 +57,8 @@ export const startWebServer = () => {
     next();
   });
 
-  app.post('/language', (req, res) => {
-    const locale = req.body.locale as string | undefined;
-
-    if (locale && ['en', 'ru', 'he'].includes(locale)) {
-      req.session.locale = locale;
-    }
-
-    res.redirect(req.headers.referer ?? '/');
-  });
-
-  app.get('/language', (req, res) => {
-    const locale = req.query.locale as string | undefined;
-
-    if (locale && ['en', 'ru', 'he'].includes(locale)) {
-      req.session.locale = locale;
-    }
-
-    res.redirect(req.headers.referer ?? '/');
-  });
-
-  app.use('/assets', express.static(join(import.meta.dirname, 'assets')));
-
   app.use('/auth', authRouter);
+  app.use('/api', apiRouter);
   app.use('/', dashboardRouter);
   app.use('/admin', ensureAuth, ensureAdmin, adminRouter);
 

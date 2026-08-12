@@ -27,12 +27,8 @@
               <td><%= r.email || (r.username ? '@' + r.username : '') || r.sourceUserId %></td>
               <td><%= new Date(r.requestedAt).toLocaleString() %></td>
               <td>
-                <form method="post" action="/admin/pending/<%= r.id %>/allow" class="inline">
-                  <button type="submit" class="btn btn-success" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.allow') %></button>
-                </form>
-                <form method="post" action="/admin/pending/<%= r.id %>/deny" class="inline">
-                  <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.deny') %></button>
-                </form>
+                <button type="button" class="btn btn-success" data-action="/api/admin/pending/<%= r.id %>/allow" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.allow') %></button>
+                <button type="button" class="btn btn-danger" data-action="/api/admin/pending/<%= r.id %>/deny" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;"><%= t('admin.deny') %></button>
               </td>
             </tr>
           <% }) %>
@@ -41,4 +37,22 @@
     <% } %>
   </div>
   <a href="/admin">&larr; <%= t('admin.back') %></a>
+  <script>
+    (function() {
+      var buttons = document.querySelectorAll('[data-action]');
+      buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          btn.disabled = true;
+          fetch(btn.getAttribute('data-action'), { method: 'POST' })
+            .then(function(r) {
+              if (!r.ok) throw new Error('failed');
+              location.reload();
+            })
+            .catch(function() {
+              btn.disabled = false;
+            });
+        });
+      });
+    })();
+  </script>
 <%- include('../partials/footer') %>

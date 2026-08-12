@@ -8,15 +8,16 @@
     <p><%= t('dashboard.signedInAs') %> <strong><%= user.name %></strong> (<%= user.email %>)</p>
     <% if (isAllowed) { %>
       <div class="message message-success"><%= t('dashboard.authorized') %></div>
-      <form method="post" action="/open" id="openForm">
+      <form id="openForm">
         <button type="submit" class="btn" id="openBtn"><%= t('dashboard.openGate') %></button>
       </form>
       <div id="openMessage" style="display:none; margin-top: 1rem; white-space: pre-wrap;" class="message"></div>
     <% } else { %>
       <div class="message message-error"><%= t('dashboard.notAuthorized') %></div>
-      <form method="post" action="/request-access">
-        <button type="submit" class="btn"><%= t('dashboard.requestAccess') %></button>
+      <form id="requestAccessForm">
+        <button type="submit" class="btn" id="requestAccessBtn"><%= t('dashboard.requestAccess') %></button>
       </form>
+      <div id="requestAccessMessage" style="display:none; margin-top: 1rem; white-space: pre-wrap;" class="message"></div>
     <% } %>
   </div>
 
@@ -56,10 +57,9 @@
         e.preventDefault();
         btn.disabled = true;
 
-        fetch('/open', { method: 'POST' })
+        fetch('/api/open', { method: 'POST' })
           .then(function(r) {
-            var contentType = r.headers.get('content-type') || '';
-            if (contentType.indexOf('application/json') === -1) {
+            if (r.status === 401) {
               window.location.href = '/';
               return null;
             }
@@ -83,13 +83,46 @@
   <% if (!isAllowed) { %>
   <script>
     (function() {
+      var form = document.getElementById('requestAccessForm');
+      var btn = document.getElementById('requestAccessBtn');
+      var messageEl = document.getElementById('requestAccessMessage');
+      if (!form || !btn || !messageEl) return;
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        btn.disabled = true;
+
+        fetch('/api/request-access', { method: 'POST' })
+          .then(function(r) {
+            if (r.status === 401) {
+              window.location.href = '/';
+              return null;
+            }
+            return r.json().then(function(data) { return { ok: r.ok && data.ok, data: data }; });
+          })
+          .then(function(result) {
+            if (!result) return;
+            messageEl.className = 'message ' + (result.ok ? 'message-success' : 'message-error');
+            messageEl.textContent = result.data.message || '';
+            messageEl.style.display = '';
+            if (!result.ok) {
+              btn.disabled = false;
+            }
+          })
+          .catch(function() {
+            btn.disabled = false;
+          });
+      });
+    })();
+  </script>
+  <script>
+    (function() {
       var pollId;
 
       function checkAuth() {
-        fetch('/status')
+        fetch('/api/status')
           .then(function(r) {
-            var contentType = r.headers.get('content-type') || '';
-            if (contentType.indexOf('application/json') === -1) {
+            if (!r.ok) {
               clearInterval(pollId);
               window.location.href = '/';
               return null;
