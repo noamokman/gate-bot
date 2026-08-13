@@ -1,11 +1,15 @@
 import crypto from 'node:crypto';
 import type { Request, Response } from 'express';
-import { OAuth2Client } from 'google-auth-library';
 import { webConfig as rawWebConfig, basicAuthUsers } from '../../framework/environment.js';
+import { getOAuthClient } from '../oauth.js';
 import { updateUser } from '../../services/db.js';
 
-const webConfig = rawWebConfig!;
-const { googleClientId, googleClientSecret, webBaseUrl, googleAdminEmails } = webConfig;
+const safeEqual = (a: string, b: string): boolean => {
+  const aDigest = crypto.createHash('sha256').update(a).digest();
+  const bDigest = crypto.createHash('sha256').update(b).digest();
+
+  return crypto.timingSafeEqual(aDigest, bDigest);
+};
 
 interface RawGoogleIdTokenClaims {
   iss: string;
@@ -24,9 +28,13 @@ interface RawGoogleIdTokenClaims {
   exp: number;
 }
 
-const oauthClient = new OAuth2Client(googleClientId, googleClientSecret);
-
 export const googleStart = (req: Request, res: Response): void => {
+  if (!rawWebConfig) {
+    res.status(500).send('Web not configured');
+    return;
+  }
+
+  const { googleClientId, webBaseUrl } = rawWebConfig;
   const state = crypto.randomUUID();
 
   req.session.oauthState = state;
@@ -46,6 +54,12 @@ export const googleStart = (req: Request, res: Response): void => {
 };
 
 export const googleCallback = async (req: Request, res: Response): Promise<void> => {
+  if (!rawWebConfig) {
+    res.status(500).send('Web not configured');
+    return;
+  }
+
+  const { googleClientId, googleClientSecret, webBaseUrl, googleAdminEmails } = rawWebConfig;
   const { code, state } = req.query;
 
   if (typeof code !== 'string' || typeof state !== 'string' || state !== req.session.oauthState) {
@@ -87,6 +101,7 @@ export const googleCallback = async (req: Request, res: Response): Promise<void>
   let claims: RawGoogleIdTokenClaims;
 
   try {
+    const oauthClient = getOAuthClient()!;
     const ticket = await oauthClient.verifyIdToken({ idToken: tokens.id_token, audience: googleClientId });
     claims = ticket.getPayload() as RawGoogleIdTokenClaims;
 
@@ -120,10 +135,17 @@ export const googleCallback = async (req: Request, res: Response): Promise<void>
     picture: user.picture,
   });
 
-  // eslint-disable-next-line require-atomic-updates
-  req.session.user = user;
+  req.session.regenerate((error) => {
+    if (error) {
+      console.error('Session regeneration failed:', error);
+      res.status(500).send('Failed to start session');
+      return;
+    }
 
-  res.redirect('/');
+    req.session.user = user;
+
+    res.redirect('/');
+  });
 };
 
 export const passwordLogin = (req: Request, res: Response): void => {
@@ -139,26 +161,43 @@ export const passwordLogin = (req: Request, res: Response): void => {
     return;
   }
 
-  const match = basicAuthUsers.find((u) => u.username === username && u.password === password);
+  const match = basicAuthUsers.find((u) => u.username === username && safeEqual(u.password, password));
 
   if (!match) {
     res.status(401).json({ ok: false, error: 'invalid' });
     return;
   }
 
-  req.session.user = {
-    provider: 'password',
-    id: username,
-    email: '',
-    name: username,
-    isAdmin: match.isAdmin,
-  };
+  req.session.regenerate((error) => {
+    if (error) {
+      res.status(500).json({ ok: false, error: 'session_error' });
+      return;
+    }
 
-  res.json({ ok: true, user: { name: username, isAdmin: match.isAdmin } });
+    req.session.user = {
+      provider: 'password',
+      id: username,
+      email: '',
+      name: username,
+      isAdmin: match.isAdmin,
+    };
+
+    res.json({ ok: true, user: { name: username, isAdmin: match.isAdmin } });
+  });
 };
 
 export const logout = (req: Request, res: Response): void => {
-  req.session.destroy(() => {
+  const { path: cookiePath, domain } = req.session.cookie;
+
+  req.session.destroy((error) => {
+    if (error) {
+      console.error('Session destroy failed:', error);
+      res.status(500).json({ ok: false, error: 'logout_failed' });
+      return;
+    }
+
+    res.clearCookie('connect.sid', { path: cookiePath, domain });
+
     res.json({ ok: true });
   });
 };

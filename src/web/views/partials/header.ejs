@@ -261,9 +261,16 @@
       if (saved && saved !== current) {
         var body = new URLSearchParams();
         body.set('locale', saved);
-        fetch('/api/language', { method: 'POST', body: body }).then(function() {
-          location.reload();
-        });
+        fetch('/api/language', { method: 'POST', headers: { 'X-Requested-With': 'fetch' }, body: body })
+          .then(function(r) { return r.json().then(function(d) { return r.ok && d.ok; }); })
+          .then(function(ok) {
+            if (ok) {
+              location.reload();
+            } else {
+              localStorage.removeItem('locale');
+            }
+          })
+          .catch(function() {});
       }
     })();
   </script>
@@ -339,9 +346,14 @@
         select.addEventListener('change', function() {
           var body = new URLSearchParams();
           body.set('locale', select.value);
-          fetch('/api/language', { method: 'POST', body: body }).then(function() {
-            location.reload();
-          });
+          fetch('/api/language', { method: 'POST', headers: { 'X-Requested-With': 'fetch' }, body: body })
+            .then(function(r) { return r.json().then(function(d) { return r.ok && d.ok; }); })
+            .then(function(ok) {
+              if (ok) {
+                localStorage.setItem('locale', select.value);
+                location.reload();
+              }
+            });
         });
       }
     })();
@@ -350,9 +362,14 @@
       if (link) {
         link.addEventListener('click', function(e) {
           e.preventDefault();
-          fetch('/api/auth/logout', { method: 'POST' }).then(function() {
-            window.location.href = '/';
-          });
+          fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Requested-With': 'fetch' } })
+            .then(function(r) {
+              if (!r.ok) throw new Error('logout_failed');
+              window.location.href = '/';
+            })
+            .catch(function() {
+              window.alert('<%= t("nav.logoutFailed") %>');
+            });
         });
       }
     })();

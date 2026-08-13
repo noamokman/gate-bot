@@ -57,7 +57,7 @@
         e.preventDefault();
         btn.disabled = true;
 
-        fetch('/api/open', { method: 'POST' })
+        fetch('/api/open', { method: 'POST', headers: { 'X-Requested-With': 'fetch' } })
           .then(function(r) {
             if (r.status === 401) {
               window.location.href = '/';
@@ -92,7 +92,7 @@
         e.preventDefault();
         btn.disabled = true;
 
-        fetch('/api/request-access', { method: 'POST' })
+        fetch('/api/request-access', { method: 'POST', headers: { 'X-Requested-With': 'fetch' } })
           .then(function(r) {
             if (r.status === 401) {
               window.location.href = '/';

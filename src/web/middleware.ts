@@ -27,6 +27,15 @@ export const ensureApiAuth = (req: Request, res: Response, next: NextFunction): 
   next();
 };
 
+export const ensureCsrf = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.get('x-requested-with')) {
+    next();
+    return;
+  }
+
+  res.status(403).json({ ok: false, error: 'forbidden' });
+};
+
 export const ensureAdmin = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.session.user?.isAdmin) {
     res.status(403).send('Forbidden');

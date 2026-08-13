@@ -19,7 +19,7 @@ export const startWebServer = () => {
     return;
   }
 
-  const { webPort, webSessionSecret, webSessionPath } = webConfig;
+  const { webPort, webSessionSecret, webSessionPath, webBaseUrl } = webConfig;
 
   const app = express();
 
@@ -42,6 +42,8 @@ export const startWebServer = () => {
       }),
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000,
+        sameSite: 'lax',
+        secure: webBaseUrl.startsWith('https://'),
       },
     }),
   );

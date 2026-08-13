@@ -5,7 +5,7 @@ import { isUserAllowed, addPendingRequest } from '../../services/db.js';
 import { botToken, adminUserIds, doorCode, parkingInfo, floor, unit, propertyNotes, basicAuthUsers } from '../../framework/environment.js';
 import { failedToOpen, opening, requestSent, alreadyAllowed } from '../../services/messages.js';
 
-const sendTelegram = (chatId: string, text: string, inlineKeyboard?: Record<string, string>[][]) => {
+const sendTelegram = async (chatId: string, text: string, inlineKeyboard?: Record<string, string>[][]) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const body: Record<string, unknown> = { chat_id: chatId, text };
 
@@ -14,11 +14,15 @@ const sendTelegram = (chatId: string, text: string, inlineKeyboard?: Record<stri
     body.reply_markup = { inline_keyboard: inlineKeyboard };
   }
 
-  void fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+
+  if (!response.ok) {
+    throw new Error(`Telegram sendMessage failed with status ${response.status}`);
+  }
 };
 
 const buildPropertyInfo = (allowed: boolean) => ({
@@ -107,7 +111,7 @@ export const requestAccess = async (req: Request, res: Response): Promise<void> 
 
   await addPendingRequest(request);
 
-  await pMap(adminUserIds, (adminId) => {
+  await pMap(adminUserIds, (adminId) =>
     sendTelegram(adminId, `Web access request\nName: ${user.name}\nEmail: ${user.email}\nUser ID: ${user.id}`, [
       [
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -115,8 +119,8 @@ export const requestAccess = async (req: Request, res: Response): Promise<void> 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         { text: 'Deny⛔', callback_data: `deny_${request.id}` },
       ],
-    ]);
-  });
+    ]),
+  );
 
   res.json({ ok: true, message: requestSent });
 };

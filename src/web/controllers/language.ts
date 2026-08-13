@@ -7,7 +7,9 @@ export const changeLanguage = (req: Request, res: Response): void => {
 
   if (locale && supportedLocales.has(locale)) {
     req.session.locale = locale;
+    res.json({ ok: true });
+    return;
   }
 
-  res.json({ ok: true });
+  res.status(400).json({ ok: false });
 };

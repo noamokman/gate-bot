@@ -10,13 +10,17 @@ import {
 import { botToken, adminUserIds } from '../../framework/environment.js';
 import { allowed, accessDenied } from '../../services/messages.js';
 
-const sendTelegram = (chatId: string, text: string) => {
-  void fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+const sendTelegram = async (chatId: string, text: string) => {
+  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     // eslint-disable-next-line @typescript-eslint/naming-convention
     body: JSON.stringify({ chat_id: chatId, text }),
   });
+
+  if (!response.ok) {
+    throw new Error(`Telegram sendMessage failed with status ${response.status}`);
+  }
 };
 
 export const adminDashboard = (req: Request, res: Response): void => {
@@ -60,11 +64,11 @@ export const allowRequest = async (req: Request, res: Response): Promise<void> =
       picture: request.picture,
     });
 
-    sendTelegram(request.sourceUserId, allowed);
+    await sendTelegram(request.sourceUserId, allowed);
 
-    await pMap([...adminUserIds], (adminId) => {
-      sendTelegram(adminId, `User ${request.name ?? request.sourceUserId} was allowed by ${adminName} (${adminEmail}) via web admin`);
-    });
+    await pMap([...adminUserIds], (adminId) =>
+      sendTelegram(adminId, `User ${request.name ?? request.sourceUserId} was allowed by ${adminName} (${adminEmail}) via web admin`),
+    );
   } else {
     await addUser({
       sourceType: 'web',
@@ -96,11 +100,11 @@ export const denyRequest = async (req: Request, res: Response): Promise<void> =>
   const adminEmail = req.session.user!.email;
 
   if (request.sourceType === 'telegram') {
-    sendTelegram(request.sourceUserId, accessDenied);
+    await sendTelegram(request.sourceUserId, accessDenied);
 
-    await pMap([...adminUserIds], (adminId) => {
-      sendTelegram(adminId, `User ${request.name ?? request.sourceUserId} was denied by ${adminName} (${adminEmail}) via web admin`);
-    });
+    await pMap([...adminUserIds], (adminId) =>
+      sendTelegram(adminId, `User ${request.name ?? request.sourceUserId} was denied by ${adminName} (${adminEmail}) via web admin`),
+    );
   }
 
   await removePendingRequest(id);

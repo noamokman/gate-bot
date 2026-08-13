@@ -5,13 +5,13 @@
     <p style="margin-bottom: 1.5rem;"><%= t('login.subtitle') %></p>
 
     <% if (typeof showPasswordLogin !== 'undefined' && showPasswordLogin) { %>
-      <div id="loginError" class="message message-error" style="display: none;"></div>
+      <div id="loginError" class="message message-error" role="alert" style="display: none;"></div>
       <form id="loginForm" style="margin-bottom: 1.5rem;">
         <div style="margin-bottom: 0.75rem;">
-          <input type="text" id="username" placeholder="<%= t('login.username') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
+          <input type="text" id="username" aria-label="<%= t('login.username') %>" placeholder="<%= t('login.username') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
         </div>
         <div style="margin-bottom: 0.75rem;">
-          <input type="password" id="password" placeholder="<%= t('login.password') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
+          <input type="password" id="password" aria-label="<%= t('login.password') %>" placeholder="<%= t('login.password') %>" required style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 0.9rem;">
         </div>
         <button type="submit" class="btn" id="loginBtn" style="width: 100%; justify-content: center;"><%= t('login.signInPassword') %></button>
       </form>
@@ -45,7 +45,7 @@
         body.set('username', document.getElementById('username').value);
         body.set('password', document.getElementById('password').value);
 
-        fetch('/api/auth/password', { method: 'POST', body: body })
+        fetch('/api/auth/password', { method: 'POST', headers: { 'X-Requested-With': 'fetch' }, body: body })
           .then(function(r) { return r.json().then(function(d) { return { ok: r.ok && d.ok, data: d }; }); })
           .then(function(result) {
             if (result.ok) {
