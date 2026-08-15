@@ -154,7 +154,7 @@ export const passwordLogin = (req: Request, res: Response): void => {
     return;
   }
 
-  const { username, password } = req.body as { username?: string; password?: string };
+  const { username, password } = (req.body ?? {}) as { username?: string; password?: string };
 
   if (!username || !password) {
     res.status(400).json({ ok: false, error: 'missing' });
