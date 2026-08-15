@@ -2,7 +2,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "admin": "Admin",
-    "logout": "Logout"
+    "logout": "Logout",
+    "logoutFailed": "Logout failed. Please try again."
   },
   "login": {
     "title": "Gate Bot",

@@ -2,7 +2,8 @@
   "nav": {
     "dashboard": "לוח בקרה",
     "admin": "ניהול",
-    "logout": "התנתק"
+    "logout": "התנתק",
+    "logoutFailed": "ההתנתקות נכשלה. נסה שוב."
   },
   "login": {
     "title": "Gate Bot",

@@ -18,9 +18,36 @@ export const ensureAuth = (req: Request, res: Response, next: NextFunction): voi
   next();
 };
 
+export const ensureApiAuth = (req: Request, res: Response, next: NextFunction): void => {
+  if (!req.session.user) {
+    res.status(401).json({ ok: false, error: 'unauthorized' });
+    return;
+  }
+
+  next();
+};
+
+export const ensureCsrf = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.get('x-requested-with')) {
+    next();
+    return;
+  }
+
+  res.status(403).json({ ok: false, error: 'forbidden' });
+};
+
 export const ensureAdmin = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.session.user?.isAdmin) {
     res.status(403).send('Forbidden');
+    return;
+  }
+
+  next();
+};
+
+export const ensureApiAdmin = (req: Request, res: Response, next: NextFunction): void => {
+  if (!req.session.user?.isAdmin) {
+    res.status(403).json({ ok: false, error: 'forbidden' });
     return;
   }
 

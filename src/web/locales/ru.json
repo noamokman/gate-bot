@@ -2,7 +2,8 @@
   "nav": {
     "dashboard": "Панель",
     "admin": "Админ",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "logoutFailed": "Не удалось выйти. Попробуйте ещё раз."
   },
   "login": {
     "title": "Gate Bot",

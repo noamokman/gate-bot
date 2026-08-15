@@ -259,7 +259,18 @@
       var saved = localStorage.getItem('locale');
       var current = '<%= locale %>';
       if (saved && saved !== current) {
-        window.location.href = '/language?locale=' + saved + '&redirect=' + encodeURIComponent(window.location.pathname);
+        var body = new URLSearchParams();
+        body.set('locale', saved);
+        fetch('/api/language', { method: 'POST', headers: { 'X-Requested-With': 'fetch' }, body: body })
+          .then(function(r) { return r.json().then(function(d) { return r.ok && d.ok; }); })
+          .then(function(ok) {
+            if (ok) {
+              location.reload();
+            } else {
+              localStorage.removeItem('locale');
+            }
+          })
+          .catch(function() {});
       }
     })();
   </script>
@@ -278,15 +289,13 @@
       <% } %>
       <span class="spacer"></span>
       <span class="user-name"><% if (user.picture) { %><img src="<%= user.picture %>" alt="" class="avatar"><% } %><%= user.name %></span>
-      <form method="post" action="/language" style="display:inline">
-        <select name="locale" class="lang-select" onchange="this.form.submit()">
-          <option value="en" <%= locale === 'en' ? 'selected' : '' %>>English</option>
-          <option value="ru" <%= locale === 'ru' ? 'selected' : '' %>>Русский</option>
-          <option value="he" <%= locale === 'he' ? 'selected' : '' %>>עברית</option>
-        </select>
-      </form>
+      <select name="locale" class="lang-select" id="langSelect">
+        <option value="en" <%= locale === 'en' ? 'selected' : '' %>>English</option>
+        <option value="ru" <%= locale === 'ru' ? 'selected' : '' %>>Русский</option>
+        <option value="he" <%= locale === 'he' ? 'selected' : '' %>>עברית</option>
+      </select>
       <button class="btn-theme" id="themeToggle" title="Toggle theme"></button>
-      <a href="/auth/logout"><%= t('nav.logout') %></a>
+      <a href="#" id="logoutLink"><%= t('nav.logout') %></a>
       </div>
     <% } %>
   </nav>
@@ -329,6 +338,39 @@
         });
         if (backdrop) backdrop.addEventListener('click', closeNav);
         if (closeBtn) closeBtn.addEventListener('click', closeNav);
+      }
+    })();
+    (function() {
+      var select = document.getElementById('langSelect');
+      if (select) {
+        select.addEventListener('change', function() {
+          var body = new URLSearchParams();
+          body.set('locale', select.value);
+          fetch('/api/language', { method: 'POST', headers: { 'X-Requested-With': 'fetch' }, body: body })
+            .then(function(r) { return r.json().then(function(d) { return r.ok && d.ok; }); })
+            .then(function(ok) {
+              if (ok) {
+                localStorage.setItem('locale', select.value);
+                location.reload();
+              }
+            });
+        });
+      }
+    })();
+    (function() {
+      var link = document.getElementById('logoutLink');
+      if (link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Requested-With': 'fetch' } })
+            .then(function(r) {
+              if (!r.ok) throw new Error('logout_failed');
+              window.location.href = '/';
+            })
+            .catch(function() {
+              window.alert('<%= t("nav.logoutFailed") %>');
+            });
+        });
       }
     })();
   </script>
