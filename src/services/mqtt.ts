@@ -1,10 +1,12 @@
 import type { MqttClient } from 'mqtt';
 import mqtt from 'mqtt';
-import { mqttUrl, mqttDiscoveryTopic, mqttCommandTopic } from '../framework/environment.js';
+import { mqttUrl, mqttDiscoveryTopic, mqttCommandTopic, webConfig } from '../framework/environment.js';
 import type { GateBotEvent } from './events.js';
 import { onEvent } from './events.js';
 
 const source = 'gate_bot';
+
+const webPendingRequestsUrl = webConfig ? new URL('/admin/pending', webConfig.webBaseUrl).toString() : undefined;
 
 const eventTypes = {
   gateOpened: 'gate_bot_triggered',
@@ -75,6 +77,7 @@ const publishEvent = async (event: GateBotEvent) => {
         event_type: eventTypes.accessRequestCreated,
         source,
         request: event.request,
+        ...(webPendingRequestsUrl ? { url: webPendingRequestsUrl } : {}),
       };
       break;
     }
