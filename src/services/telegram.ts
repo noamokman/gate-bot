@@ -15,6 +15,14 @@ export const sendMessage = async (chatId: string | number, text: string, replyMa
   await telegram.sendMessage(chatId, text, replyMarkup ? { reply_markup: replyMarkup } : undefined);
 };
 
+const trySendMessage = async (chatId: string | number, text: string, replyMarkup?: InlineKeyboardMarkup): Promise<void> => {
+  try {
+    await sendMessage(chatId, text, replyMarkup);
+  } catch (error) {
+    console.error(`Failed to send Telegram message to ${chatId}`, error);
+  }
+};
+
 export const editMessageText = async (chatId: string | number, messageId: number, text: string): Promise<void> => {
   await telegram.editMessageText(chatId, messageId, undefined, text);
 };
@@ -60,7 +68,7 @@ const sendAccessRequestToAdmins = async (request: PendingRequest): Promise<void>
     Markup.button.callback('Deny⛔', `deny_${request.id}`),
   ]).reply_markup;
 
-  await pMap([...adminUserIds], (adminId) => sendMessage(adminId, buildAccessRequestAdminText(request), keyboard));
+  await pMap([...adminUserIds], (adminId) => trySendMessage(adminId, buildAccessRequestAdminText(request), keyboard));
 };
 
 const editResolvedMessage = async (
@@ -68,12 +76,16 @@ const editResolvedMessage = async (
   request: PendingRequest,
   action: 'allowed' | 'denied',
 ): Promise<void> => {
-  await editMessageReplyMarkup(messageRef.chatId, messageRef.messageId);
-  await editMessageText(
-    messageRef.chatId,
-    messageRef.messageId,
-    `${buildAccessRequestAdminText(request)}\n${action === 'allowed' ? 'Approved' : 'Denied'}`,
-  );
+  try {
+    await editMessageReplyMarkup(messageRef.chatId, messageRef.messageId);
+    await editMessageText(
+      messageRef.chatId,
+      messageRef.messageId,
+      `${buildAccessRequestAdminText(request)}\n${action === 'allowed' ? 'Approved' : 'Denied'}`,
+    );
+  } catch (error) {
+    console.error(`Failed to edit resolved request message in chat ${messageRef.chatId}`, error);
+  }
 };
 
 const handleEvent = async (event: GateBotEvent): Promise<void> => {
@@ -93,13 +105,13 @@ const handleEvent = async (event: GateBotEvent): Promise<void> => {
       const { request, admin, messageRef } = event;
 
       if (request.sourceType === 'telegram') {
-        await sendMessage(request.sourceUserId, event.type === 'access_request_allowed' ? allowed : accessDenied);
+        await trySendMessage(request.sourceUserId, event.type === 'access_request_allowed' ? allowed : accessDenied);
       }
 
       const action = event.type === 'access_request_allowed' ? 'allowed' : 'denied';
       const adminIds = [...adminUserIds].filter((id) => id !== admin?.userId);
 
-      await pMap(adminIds, (adminId) => sendMessage(adminId, buildResolutionAdminText(request, admin, action)));
+      await pMap(adminIds, (adminId) => trySendMessage(adminId, buildResolutionAdminText(request, admin, action)));
 
       if (messageRef) {
         await editResolvedMessage(messageRef, request, action);

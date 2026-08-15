@@ -101,27 +101,27 @@ services:
 
 ### Telegram Commands
 
-| Command | Description |
-|---|---|
-| `/start` | Start the bot |
-| `/help` | Get help on how to use the bot |
-| `/check_authorization` | Check if you are allowed to open the gate |
-| `/request_access` | Request access to open the gate |
-| `/open` | Open the gate |
-| `/info` | View property info (door code, parking, floor, unit, notes) |
+| Command                | Description                                                 |
+| ---------------------- | ----------------------------------------------------------- |
+| `/start`               | Start the bot                                               |
+| `/help`                | Get help on how to use the bot                              |
+| `/check_authorization` | Check if you are allowed to open the gate                   |
+| `/request_access`      | Request access to open the gate                             |
+| `/open`                | Open the gate                                               |
+| `/info`                | View property info (door code, parking, floor, unit, notes) |
 
 ### Web UI
 
 The web server is started automatically when the Google OAuth environment variables are configured.
 
-| Feature | URL | Access |
-|---|---|---|
+| Feature           | URL                                  | Access                                              |
+| ----------------- | ------------------------------------ | --------------------------------------------------- |
 | Login / Dashboard | `/` (dashboard shown when signed in) | Public for login; authenticated users for dashboard |
-| Open Gate | `/` (Open Gate button) | Authorized users |
-| Property Info | `/` (info card) | Authorized users |
-| Admin Panel | `/admin` | Users with email in `GOOGLE_ADMIN_EMAILS` |
-| Pending Requests | `/admin/pending` | Admins |
-| Manage Users | `/admin/users` | Admins |
+| Open Gate         | `/` (Open Gate button)               | Authorized users                                    |
+| Property Info     | `/` (info card)                      | Authorized users                                    |
+| Admin Panel       | `/admin`                             | Users with email in `GOOGLE_ADMIN_EMAILS`           |
+| Pending Requests  | `/admin/pending`                     | Admins                                              |
+| Manage Users      | `/admin/users`                       | Admins                                              |
 
 **Flow for web users:**
 
@@ -154,13 +154,7 @@ Example payload sent to Home Assistant:
 {
   "name": "Gate Bot Event",
   "unique_id": "gate_bot_event",
-  "event_types": [
-    "gate_bot_triggered",
-    "gate_open_failed",
-    "access_request_created",
-    "access_request_allowed",
-    "access_request_denied"
-  ],
+  "event_types": ["gate_bot_triggered", "gate_open_failed", "access_request_created", "access_request_allowed", "access_request_denied"],
   "state_topic": "home/gate_bot/event",
   "value_template": "{{ value_json.event_type }}",
   "json_attributes_topic": "home/gate_bot/event",
@@ -201,7 +195,7 @@ The `userInfo.sourceType` field indicates where the open request originated — 
 
 **Access request created** — published when a user requests access (via Telegram or web):
 
-```
+```json
 payload: {
   "event_type": "access_request_created",
   "source": "gate_bot",

@@ -78,13 +78,11 @@ export const denyRequest = async (req: Request, res: Response): Promise<void> =>
   const adminName = req.session.user!.name;
   const adminEmail = req.session.user!.email;
 
-  if (request.sourceType === 'telegram') {
-    await publish({
-      type: 'access_request_denied',
-      request,
-      admin: { name: adminName, email: adminEmail },
-    });
-  }
+  await publish({
+    type: 'access_request_denied',
+    request,
+    admin: { name: adminName, email: adminEmail },
+  });
 
   await removePendingRequest(id);
 

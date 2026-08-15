@@ -41,5 +41,11 @@ export const onEvent = (listener: Listener): (() => void) => {
 };
 
 export const publish = async (event: GateBotEvent): Promise<void> => {
-  await Promise.all([...listeners].map((listener) => Promise.resolve(listener(event))));
+  await Promise.all(
+    [...listeners].map((listener) =>
+      Promise.resolve(listener(event)).catch((error) => {
+        console.error(`Failed to handle event ${event.type}`, error);
+      }),
+    ),
+  );
 };
