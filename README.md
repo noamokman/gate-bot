@@ -101,27 +101,27 @@ services:
 
 ### Telegram Commands
 
-| Command | Description |
-|---|---|
-| `/start` | Start the bot |
-| `/help` | Get help on how to use the bot |
-| `/check_authorization` | Check if you are allowed to open the gate |
-| `/request_access` | Request access to open the gate |
-| `/open` | Open the gate |
-| `/info` | View property info (door code, parking, floor, unit, notes) |
+| Command                | Description                                                 |
+| ---------------------- | ----------------------------------------------------------- |
+| `/start`               | Start the bot                                               |
+| `/help`                | Get help on how to use the bot                              |
+| `/check_authorization` | Check if you are allowed to open the gate                   |
+| `/request_access`      | Request access to open the gate                             |
+| `/open`                | Open the gate                                               |
+| `/info`                | View property info (door code, parking, floor, unit, notes) |
 
 ### Web UI
 
 The web server is started automatically when the Google OAuth environment variables are configured.
 
-| Feature | URL | Access |
-|---|---|---|
+| Feature           | URL                                  | Access                                              |
+| ----------------- | ------------------------------------ | --------------------------------------------------- |
 | Login / Dashboard | `/` (dashboard shown when signed in) | Public for login; authenticated users for dashboard |
-| Open Gate | `/` (Open Gate button) | Authorized users |
-| Property Info | `/` (info card) | Authorized users |
-| Admin Panel | `/admin` | Users with email in `GOOGLE_ADMIN_EMAILS` |
-| Pending Requests | `/admin/pending` | Admins |
-| Manage Users | `/admin/users` | Admins |
+| Open Gate         | `/` (Open Gate button)               | Authorized users                                    |
+| Property Info     | `/` (info card)                      | Authorized users                                    |
+| Admin Panel       | `/admin`                             | Users with email in `GOOGLE_ADMIN_EMAILS`           |
+| Pending Requests  | `/admin/pending`                     | Admins                                              |
+| Manage Users      | `/admin/users`                       | Admins                                              |
 
 **Flow for web users:**
 
@@ -154,7 +154,7 @@ Example payload sent to Home Assistant:
 {
   "name": "Gate Bot Event",
   "unique_id": "gate_bot_event",
-  "event_types": ["gate_bot_triggered"],
+  "event_types": ["gate_bot_triggered", "gate_open_failed", "access_request_created", "access_request_allowed", "access_request_denied"],
   "state_topic": "home/gate_bot/event",
   "value_template": "{{ value_json.event_type }}",
   "json_attributes_topic": "home/gate_bot/event",
@@ -167,11 +167,11 @@ Example payload sent to Home Assistant:
 }
 ```
 
-### **Publishing MQTT Commands**
+### **Publishing MQTT Events**
 
-When the bot receives the `/open` command, it publishes an MQTT message to the command topic defined by `MQTT_COMMAND_TOPIC`.
+The bot publishes domain events to the MQTT command topic defined by `MQTT_COMMAND_TOPIC`. All events include an `event_type`, `source` (`gate_bot`), and event-specific payload.
 
-Example message published:
+**Gate opened** — published when an authorized user opens the gate:
 
 ```
 topic: home/gate_bot/event
@@ -189,6 +189,29 @@ payload: {
 }
 ```
 
-The `userInfo.sourceType` field indicates where the open request originated — `"telegram"` for the Telegram bot or `"web"` for the web dashboard.
+The `userInfo.sourceType` field indicates where the open request originated — `"telegram"` for the Telegram bot or `"web"` for the web dashboard. This allows Home Assistant to trigger the gate opening automatically.
 
-This allows Home Assistant to trigger the gate opening automatically.
+**Gate open failed** — published when opening the gate fails, with an `error` field describing the failure.
+
+**Access request created** — published when a user requests access (via Telegram or web):
+
+```json
+payload: {
+  "event_type": "access_request_created",
+  "source": "gate_bot",
+  "request": {
+    "id": "telegram:123456789",
+    "sourceType": "telegram",
+    "sourceUserId": "123456789",
+    "name": "John Doe",
+    "username": "example_user",
+    "requestedAt": "2026-08-15T12:00:00.000Z"
+  }
+}
+```
+
+**Access request allowed / denied** — published when an admin approves or denies a pending request, including the `request` and the resolving `admin` (name/email for web admins, user ID for Telegram admins).
+
+### **Event-Driven Architecture**
+
+All outbound notifications go through an internal event bus (`src/services/events.ts`). Telegram messages are sent exclusively by the Telegram listener in `src/services/telegram.ts`, and MQTT publishes are handled by the MQTT listener in `src/services/mqtt.ts`. This makes it easy to add new consumers (e.g. additional Telegram chats, logging, or home automation triggers) by subscribing to events.

@@ -106,5 +106,3 @@ export const removePendingRequest = async (id: string) => {
 };
 
 export const getPendingRequests = () => [...(db.data.pendingRequests ?? [])];
-
-

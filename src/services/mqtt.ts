@@ -1,9 +1,18 @@
 import type { MqttClient } from 'mqtt';
 import mqtt from 'mqtt';
 import { mqttUrl, mqttDiscoveryTopic, mqttCommandTopic } from '../framework/environment.js';
-import type { UserInfo } from '../types.js';
+import type { GateBotEvent } from './events.js';
+import { onEvent } from './events.js';
 
-const eventType = 'gate_bot_triggered';
+const source = 'gate_bot';
+
+const eventTypes = {
+  gateOpened: 'gate_bot_triggered',
+  gateOpenFailed: 'gate_open_failed',
+  accessRequestCreated: 'access_request_created',
+  accessRequestAllowed: 'access_request_allowed',
+  accessRequestDenied: 'access_request_denied',
+} as const;
 
 let client: MqttClient;
 
@@ -16,7 +25,7 @@ const publishDiscovery = () => {
     /* eslint-disable @typescript-eslint/naming-convention */
     name: 'Gate Bot Event',
     unique_id: 'gate_bot_event',
-    event_types: [eventType],
+    event_types: [...new Set(Object.values(eventTypes))],
     state_topic: mqttCommandTopic,
     json_attributes_topic: mqttCommandTopic,
     device: {
@@ -31,6 +40,69 @@ const publishDiscovery = () => {
   client.publish(mqttDiscoveryTopic, discoveryPayload, { retain: true });
 };
 
+const publishEvent = async (event: GateBotEvent) => {
+  if (!client || !mqttCommandTopic) {
+    return;
+  }
+
+  let payload: Record<string, unknown>;
+
+  switch (event.type) {
+    case 'gate_opened': {
+      payload = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        event_type: eventTypes.gateOpened,
+        source,
+        action: 'open_gate',
+        userInfo: event.userInfo,
+      };
+      break;
+    }
+    case 'gate_open_failed': {
+      payload = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        event_type: eventTypes.gateOpenFailed,
+        source,
+        action: 'open_gate',
+        userInfo: event.userInfo,
+        error: event.error,
+      };
+      break;
+    }
+    case 'access_request_created': {
+      payload = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        event_type: eventTypes.accessRequestCreated,
+        source,
+        request: event.request,
+      };
+      break;
+    }
+    case 'access_request_allowed': {
+      payload = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        event_type: eventTypes.accessRequestAllowed,
+        source,
+        request: event.request,
+        admin: event.admin,
+      };
+      break;
+    }
+    case 'access_request_denied': {
+      payload = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        event_type: eventTypes.accessRequestDenied,
+        source,
+        request: event.request,
+        admin: event.admin,
+      };
+      break;
+    }
+  }
+
+  await client.publishAsync(mqttCommandTopic, JSON.stringify(payload));
+};
+
 export const initMqtt = async () => {
   if (!mqttUrl) {
     return;
@@ -39,20 +111,6 @@ export const initMqtt = async () => {
   client = await mqtt.connectAsync(mqttUrl);
 
   publishDiscovery();
-};
 
-export const open = async (userInfo: UserInfo) => {
-  if (!client || !mqttCommandTopic) {
-    return;
-  }
-
-  const eventPayload = JSON.stringify({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    event_type: eventType,
-    source: 'gate_bot',
-    action: 'open_gate',
-    userInfo,
-  });
-
-  await client.publishAsync(mqttCommandTopic, eventPayload);
+  onEvent(publishEvent);
 };
