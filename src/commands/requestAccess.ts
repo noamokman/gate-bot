@@ -1,10 +1,9 @@
-import { Markup } from 'telegraf';
 import type { Telegraf } from 'telegraf';
-import pMap from 'p-map';
 import { authorize } from '../services/authorize.js';
 import { alreadyAllowed, requestSent } from '../services/messages.js';
 import { addPendingRequest } from '../services/db.js';
-import { adminUserIds } from '../framework/environment.js';
+import { sendMessage } from '../services/telegram.js';
+import { publish } from '../services/events.js';
 import { getTelegramProfilePhoto } from '../services/telegramPhoto.js';
 
 export const requestAccessCommand = (bot: Telegraf) => {
@@ -12,7 +11,7 @@ export const requestAccessCommand = (bot: Telegraf) => {
     const userId = ctx.from.id.toString();
 
     if (authorize(userId)) {
-      return ctx.reply(alreadyAllowed);
+      return sendMessage(ctx.chat.id, alreadyAllowed);
     }
 
     const request = {
@@ -29,17 +28,8 @@ export const requestAccessCommand = (bot: Telegraf) => {
 
     await addPendingRequest(request);
 
-    await pMap(adminUserIds, (adminUserId) =>
-      ctx.telegram.sendMessage(
-        adminUserId,
-        `Request recieved\nusername: ${ctx.from.username}\nFull name: ${ctx.from.first_name} ${ctx.from.last_name}\nId: ${userId}`,
-        Markup.inlineKeyboard([
-          Markup.button.callback('Allow✅', `allow_${request.id}`),
-          Markup.button.callback('Deny⛔', `deny_${request.id}`),
-        ]),
-      ),
-    );
+    await publish({ type: 'access_request_created', request });
 
-    return ctx.reply(requestSent);
+    return sendMessage(ctx.chat.id, requestSent);
   });
 };

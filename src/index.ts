@@ -7,6 +7,7 @@ import { botToken, webConfig } from './framework/environment.js';
 import { authorizeContext } from './services/authorize.js';
 import { allowed, helpAllowed, notAllowed, welcome } from './services/messages.js';
 import { setBotPhotoIfMissing } from './services/telegramPhoto.js';
+import { initTelegram, sendMessage } from './services/telegram.js';
 import { openCommand } from './commands/open.js';
 import { requestAccessCommand } from './commands/requestAccess.js';
 import { checkAuthorizationCommand } from './commands/checkAuthorization.js';
@@ -19,9 +20,17 @@ import { startWebServer } from './web/app.js';
 
 const bot = new Telegraf(botToken);
 
-bot.start((ctx) => ctx.reply(`${welcome}\n${!authorizeContext(ctx) ? notAllowed : `${allowed}\n${helpAllowed}`}`));
+initTelegram(bot);
 
-const helpHandler = (ctx: Context) => ctx.reply(!authorizeContext(ctx) ? notAllowed : helpAllowed);
+bot.start((ctx) => sendMessage(ctx.chat.id, `${welcome}\n${!authorizeContext(ctx) ? notAllowed : `${allowed}\n${helpAllowed}`}`));
+
+const helpHandler = (ctx: Context) => {
+  if (!ctx.chat) {
+    return;
+  }
+
+  return sendMessage(ctx.chat.id, !authorizeContext(ctx) ? notAllowed : helpAllowed);
+};
 
 checkAuthorizationCommand(bot);
 requestAccessCommand(bot);

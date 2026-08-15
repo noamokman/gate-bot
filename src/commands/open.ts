@@ -3,6 +3,7 @@ import { open } from '../services/open.js';
 import { authorize } from '../services/authorize.js';
 import { updateUser } from '../services/db.js';
 import { getTelegramProfilePhoto } from '../services/telegramPhoto.js';
+import { sendMessage } from '../services/telegram.js';
 import { failedToOpen, notAllowed, opening } from '../services/messages.js';
 
 export const openCommand = (bot: Telegraf) => {
@@ -10,7 +11,7 @@ export const openCommand = (bot: Telegraf) => {
     const userId = ctx.from.id.toString();
 
     if (!authorize(userId)) {
-      return ctx.reply(notAllowed);
+      return sendMessage(ctx.chat.id, notAllowed);
     }
 
     try {
@@ -37,12 +38,12 @@ export const openCommand = (bot: Telegraf) => {
       });
     } catch (error) {
       if (error instanceof Error) {
-        return ctx.reply(`${failedToOpen}\n${error.message}`);
+        return sendMessage(ctx.chat.id, `${failedToOpen}\n${error.message}`);
       }
 
-      return ctx.reply(failedToOpen);
+      return sendMessage(ctx.chat.id, failedToOpen);
     }
 
-    return ctx.reply(opening);
+    return sendMessage(ctx.chat.id, opening);
   });
 };

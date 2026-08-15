@@ -1,27 +1,6 @@
 import type { Request, Response } from 'express';
-import pMap from 'p-map';
-import {
-  addUser,
-  removeUser as removeDbUser,
-  getUsers,
-  getPendingRequests,
-  removePendingRequest,
-} from '../../services/db.js';
-import { botToken, adminUserIds } from '../../framework/environment.js';
-import { allowed, accessDenied } from '../../services/messages.js';
-
-const sendTelegram = async (chatId: string, text: string) => {
-  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    body: JSON.stringify({ chat_id: chatId, text }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Telegram sendMessage failed with status ${response.status}`);
-  }
-};
+import { addUser, removeUser as removeDbUser, getUsers, getPendingRequests, removePendingRequest } from '../../services/db.js';
+import { publish } from '../../services/events.js';
 
 export const adminDashboard = (req: Request, res: Response): void => {
   const pendingCount = getPendingRequests().length;
@@ -53,33 +32,33 @@ export const allowRequest = async (req: Request, res: Response): Promise<void> =
   const adminName = req.session.user!.name;
   const adminEmail = req.session.user!.email;
 
-  if (request.sourceType === 'telegram') {
-    await addUser({
-      sourceType: 'telegram',
-      id: request.sourceUserId,
-      name: request.name,
-      username: request.username,
-      firstName: request.firstName,
-      lastName: request.lastName,
-      picture: request.picture,
-    });
+  await addUser(
+    request.sourceType === 'telegram'
+      ? {
+          sourceType: 'telegram',
+          id: request.sourceUserId,
+          name: request.name,
+          username: request.username,
+          firstName: request.firstName,
+          lastName: request.lastName,
+          picture: request.picture,
+        }
+      : {
+          sourceType: 'web',
+          id: request.sourceUserId,
+          name: request.name ?? '',
+          email: request.email ?? '',
+          firstName: request.firstName,
+          lastName: request.lastName,
+          picture: request.picture,
+        },
+  );
 
-    await sendTelegram(request.sourceUserId, allowed);
-
-    await pMap([...adminUserIds], (adminId) =>
-      sendTelegram(adminId, `User ${request.name ?? request.sourceUserId} was allowed by ${adminName} (${adminEmail}) via web admin`),
-    );
-  } else {
-    await addUser({
-      sourceType: 'web',
-      id: request.sourceUserId,
-      name: request.name ?? '',
-      email: request.email ?? '',
-      firstName: request.firstName,
-      lastName: request.lastName,
-      picture: request.picture,
-    });
-  }
+  await publish({
+    type: 'access_request_allowed',
+    request,
+    admin: { name: adminName, email: adminEmail },
+  });
 
   await removePendingRequest(id);
 
@@ -100,11 +79,11 @@ export const denyRequest = async (req: Request, res: Response): Promise<void> =>
   const adminEmail = req.session.user!.email;
 
   if (request.sourceType === 'telegram') {
-    await sendTelegram(request.sourceUserId, accessDenied);
-
-    await pMap([...adminUserIds], (adminId) =>
-      sendTelegram(adminId, `User ${request.name ?? request.sourceUserId} was denied by ${adminName} (${adminEmail}) via web admin`),
-    );
+    await publish({
+      type: 'access_request_denied',
+      request,
+      admin: { name: adminName, email: adminEmail },
+    });
   }
 
   await removePendingRequest(id);

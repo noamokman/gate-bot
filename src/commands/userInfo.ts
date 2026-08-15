@@ -2,6 +2,7 @@ import type { Telegraf } from 'telegraf';
 import { authorize } from '../services/authorize.js';
 import { doorCode, parkingInfo, floor, unit, propertyNotes } from '../framework/environment.js';
 import { infoHeading, notAllowed } from '../services/messages.js';
+import { sendMessage } from '../services/telegram.js';
 
 const infoLines: string[] = [
   infoHeading,
@@ -19,9 +20,9 @@ export const userInfoCommand = (bot: Telegraf) => {
     const userId = ctx.from.id.toString();
 
     if (!authorize(userId)) {
-      return ctx.reply(notAllowed);
+      return sendMessage(ctx.chat.id, notAllowed);
     }
 
-    return ctx.reply(infoString);
+    return sendMessage(ctx.chat.id, infoString);
   });
 };
