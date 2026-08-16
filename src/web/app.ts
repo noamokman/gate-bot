@@ -3,6 +3,7 @@ import express from 'express';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
 import { webConfig } from '../framework/environment.js';
+import { getTelegramUsername, waitForTelegramUsername } from '../services/system.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { aboutRouter } from './routes/about.js';
@@ -15,10 +16,12 @@ import { detectLocale, t } from './locales/index.js';
 const FileStore = sessionFileStore(session);
 const viewsDir = join(import.meta.dirname, 'views');
 
-export const startWebServer = () => {
+export const startWebServer = async () => {
   if (!webConfig) {
     return;
   }
+
+  await waitForTelegramUsername();
 
   const { webPort, webSessionSecret, webSessionPath, webBaseUrl } = webConfig;
 
@@ -56,6 +59,7 @@ export const startWebServer = () => {
 
     res.locals.t = (key: string) => t(locale, key);
     res.locals.locale = locale;
+    res.locals.telegramUsername = getTelegramUsername();
 
     next();
   });

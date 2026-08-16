@@ -3,6 +3,7 @@
     "dashboard": "Панель",
     "admin": "Админ",
     "about": "О проекте",
+    "telegram": "Telegram",
     "logout": "Выйти",
     "logoutFailed": "Не удалось выйти. Попробуйте ещё раз."
   },
@@ -14,7 +15,8 @@
     "username": "Имя пользователя",
     "password": "Пароль",
     "invalidCredentials": "Неверное имя пользователя или пароль.",
-    "missingCredentials": "Пожалуйста, введите имя пользователя и пароль."
+    "missingCredentials": "Пожалуйста, введите имя пользователя и пароль.",
+    "telegram": "Или используйте Telegram-бота"
   },
   "dashboard": {
     "title": "Панель",

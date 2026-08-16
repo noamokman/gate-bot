@@ -3,5 +3,4 @@ import { startTelegramBot } from './bot/app.js';
 import { initMqtt } from './services/mqtt.js';
 import { startWebServer } from './web/app.js';
 
-startWebServer();
-await Promise.allSettled([startTelegramBot(), initMqtt()]);
+await Promise.allSettled([startWebServer(), startTelegramBot(), initMqtt()]);

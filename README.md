@@ -115,10 +115,13 @@ services:
 | `/request_access`      | Request access to open the gate                             |
 | `/open`                | Open the gate                                               |
 | `/info`                | View property info (door code, parking, floor, unit, notes) |
+| `/web`                 | Link to the web UI (only when the web UI is configured)     |
 
 ### Web UI
 
 The web server is started automatically when the Google OAuth environment variables are configured.
+
+When the Telegram bot is enabled, its handle (fetched dynamically from the Telegram API) is shown on the login page and in the site navigation, linking back to the bot. Conversely, when the web UI is configured, the bot exposes a `/web` command that links to the website.
 
 | Feature           | URL                                  | Access                                              |
 | ----------------- | ------------------------------------ | --------------------------------------------------- |
