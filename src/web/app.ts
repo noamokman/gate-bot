@@ -64,6 +64,10 @@ export const startWebServer = () => {
   app.use('/', dashboardRouter);
   app.use('/admin', ensureAuth, ensureAdmin, adminRouter);
 
+  app.use((_req, res) => {
+    res.redirect('/');
+  });
+
   app.listen(webPort, () => {
     console.log(`Web server started on port ${webPort}`);
   });
