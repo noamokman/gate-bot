@@ -17,4 +17,8 @@ router.post('/admin/pending/:id/allow', ensureCsrf, ensureApiAuth, ensureApiAdmi
 router.post('/admin/pending/:id/deny', ensureCsrf, ensureApiAuth, ensureApiAdmin, denyRequest);
 router.post('/admin/users/:sourceType/:id/remove', ensureCsrf, ensureApiAuth, ensureApiAdmin, removeUser);
 
+router.use((_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 export { router as apiRouter };
