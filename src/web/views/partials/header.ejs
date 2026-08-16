@@ -287,6 +287,7 @@
       <% if (user.isAdmin) { %>
         <a href="/admin"><%= t('nav.admin') %></a>
       <% } %>
+      <a href="/about"><%= t('nav.about') %></a>
       <span class="spacer"></span>
       <span class="user-name"><% if (user.picture) { %><img src="<%= user.picture %>" alt="" class="avatar"><% } %><%= user.name %></span>
       <select name="locale" class="lang-select" id="langSelect">

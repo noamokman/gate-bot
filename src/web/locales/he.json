@@ -2,6 +2,7 @@
   "nav": {
     "dashboard": "לוח בקרה",
     "admin": "ניהול",
+    "about": "אודות",
     "logout": "התנתק",
     "logoutFailed": "ההתנתקות נכשלה. נסה שוב."
   },
@@ -31,6 +32,13 @@
     "infoFloor": "קומה",
     "infoUnit": "דירה / מספר",
     "infoNotes": "הערות"
+  },
+  "about": {
+    "title": "אודות Gate Bot",
+    "description": "הפרויקט הזה מאפשר למשתמשים מורשים לפתוח שער. הוא כולל בוט טלגרם אופציונלי וממשק אינטרנט, ותומך ב-HTTP ו-MQTT לשילוב עם Home Assistant.",
+    "version": "גרסה",
+    "build": "בנייה",
+    "github": "צפה ב-GitHub"
   },
   "admin": {
     "title": "ניהול",

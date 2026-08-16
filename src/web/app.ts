@@ -5,6 +5,7 @@ import sessionFileStore from 'session-file-store';
 import { webConfig } from '../framework/environment.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
+import { aboutRouter } from './routes/about.js';
 import { adminRouter } from './routes/admin.js';
 import { apiRouter } from './routes/api.js';
 import { ensureAuth, ensureAdmin } from './middleware.js';
@@ -62,6 +63,7 @@ export const startWebServer = () => {
   app.use('/auth', authRouter);
   app.use('/api', apiRouter);
   app.use('/', dashboardRouter);
+  app.use('/', aboutRouter);
   app.use('/admin', ensureAuth, ensureAdmin, adminRouter);
 
   app.use((_req, res) => {

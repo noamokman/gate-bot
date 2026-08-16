@@ -1,0 +1,9 @@
+<%- include('partials/header') %>
+  <div class="card" style="text-align: center;">
+    <img src="/assets/logo.png" alt="Gate Bot logo" style="width: 512px; height: 512px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem;">
+    <h1><%= t('about.title') %></h1>
+    <p><%= t('about.description') %></p>
+    <p><%= t('about.version') %>: <strong><%= packageVersion %></strong><% if (buildVersion && buildVersion !== '0.0.0') { %> · <%= t('about.build') %>: <strong><%= buildVersion %></strong><% } %></p>
+    <a href="https://github.com/noamokman/gate-bot" target="_blank" rel="noopener noreferrer" class="btn"><%= t('about.github') %></a>
+  </div>
+<%- include('partials/footer') %>
