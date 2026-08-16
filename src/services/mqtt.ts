@@ -6,7 +6,9 @@ import { onEvent } from './events.js';
 
 const source = 'gate_bot';
 
-const webPendingRequestsUrl = webConfig ? new URL('/admin/pending', webConfig.webBaseUrl).toString() : undefined;
+const webPendingRequestsUrl = webConfig
+  ? new URL('admin/pending', `${webConfig.webBaseUrl.replace(/\/+$/, '')}/`).toString()
+  : undefined;
 
 const eventTypes = {
   gateOpened: 'gate_bot_triggered',
