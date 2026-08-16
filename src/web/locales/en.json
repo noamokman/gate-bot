@@ -2,6 +2,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "admin": "Admin",
+    "about": "About",
     "logout": "Logout",
     "logoutFailed": "Logout failed. Please try again."
   },
@@ -31,6 +32,13 @@
     "infoFloor": "Floor",
     "infoUnit": "Unit / Apartment",
     "infoNotes": "Notes"
+  },
+  "about": {
+    "title": "About Gate Bot",
+    "description": "This project allows authorized users to open a gate. It comes with an optional Telegram bot and web UI, and supports both HTTP and MQTT for integration with Home Assistant.",
+    "version": "Version",
+    "build": "Build",
+    "github": "View on GitHub"
   },
   "admin": {
     "title": "Admin",
