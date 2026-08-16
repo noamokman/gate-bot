@@ -1,5 +1,6 @@
 import type { Context } from 'telegraf';
 import { Telegraf } from 'telegraf';
+import type { User } from 'telegraf/types';
 // eslint-disable-next-line import-x/extensions
 import { message } from 'telegraf/filters';
 import { botToken } from '../framework/environment.js';
@@ -34,9 +35,15 @@ export const startTelegramBot = async (): Promise<void> => {
 
   const bot = new Telegraf(botToken);
 
+  const { telegram } = bot;
+
+  let me: User | undefined;
   try {
-    const me = await bot.telegram.getMe();
-    setTelegramUsername(me.username);
+    const botInfo = await telegram.getMe();
+    // eslint-disable-next-line require-atomic-updates
+    bot.botInfo = botInfo;
+    me = botInfo;
+    setTelegramUsername(botInfo.username);
   } catch (error) {
     console.error('Failed to fetch bot info:', error);
     setTelegramUsername();
@@ -72,9 +79,9 @@ export const startTelegramBot = async (): Promise<void> => {
     commands.push({ command: 'web', description: 'Open the web UI' });
   }
 
-  await bot.telegram.setMyCommands(commands);
+  await telegram.setMyCommands(commands);
 
-  await setBotPhotoIfMissing(bot.telegram);
+  await setBotPhotoIfMissing(telegram, me);
 
   process.once('SIGINT', () => {
     bot.stop('SIGINT');
@@ -83,7 +90,10 @@ export const startTelegramBot = async (): Promise<void> => {
     bot.stop('SIGTERM');
   });
 
-  await bot.launch();
+  await bot.launch({}, () => {
+    // eslint-disable-next-line unicorn/consistent-destructuring
+    setTelegramUsername(bot.botInfo?.username);
+  });
 
   console.log('Telegram bot started');
 };

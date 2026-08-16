@@ -1,13 +1,14 @@
 import { readFile } from 'node:fs/promises';
 import type { Telegram } from 'telegraf';
+import type { User } from 'telegraf/types';
 import { botToken, logoJpgPath } from '../framework/environment.js';
 
 const PHOTO_TIMEOUT_MS = 10_000;
 
-export const setBotPhotoIfMissing = async (telegram: Telegram): Promise<void> => {
+export const setBotPhotoIfMissing = async (telegram: Telegram, me?: User): Promise<void> => {
   try {
-    const me = await telegram.getMe();
-    const chat = await telegram.getChat(me.id);
+    const bot = me ?? (await telegram.getMe());
+    const chat = await telegram.getChat(bot.id);
 
     if (chat.photo) {
       return;

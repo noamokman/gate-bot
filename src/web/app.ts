@@ -3,7 +3,7 @@ import express from 'express';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
 import { webConfig } from '../framework/environment.js';
-import { getTelegramUsername, waitForTelegramUsername } from '../services/system.js';
+import { getTelegramUsername } from '../services/system.js';
 import { authRouter } from './routes/auth.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { aboutRouter } from './routes/about.js';
@@ -20,8 +20,6 @@ export const startWebServer = async () => {
   if (!webConfig) {
     return;
   }
-
-  await waitForTelegramUsername();
 
   const { webPort, webSessionSecret, webSessionPath, webBaseUrl } = webConfig;
 
@@ -74,7 +72,12 @@ export const startWebServer = async () => {
     res.redirect('/');
   });
 
-  app.listen(webPort, () => {
+  const server = app.listen(webPort, () => {
     console.log(`Web server started on port ${webPort}`);
+  });
+
+  server.on('error', (error) => {
+    console.error(`Web server failed on port ${webPort}:`, error);
+    process.exit(1);
   });
 };
