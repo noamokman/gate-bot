@@ -25,6 +25,7 @@ const helpHandler = (ctx: Context) => {
 
 export const startTelegramBot = async (): Promise<void> => {
   if (!botToken) {
+    console.log('Telegram bot skipped: BOT_TOKEN not set');
     return;
   }
 
@@ -63,4 +64,6 @@ export const startTelegramBot = async (): Promise<void> => {
   });
 
   await bot.launch();
+
+  console.log('Telegram bot started');
 };

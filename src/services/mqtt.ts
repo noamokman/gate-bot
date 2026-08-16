@@ -110,6 +110,7 @@ const publishEvent = async (event: GateBotEvent) => {
 
 export const initMqtt = async () => {
   if (!mqttUrl) {
+    console.log('MQTT skipped: MQTT_URL not set');
     return;
   }
 
@@ -118,4 +119,6 @@ export const initMqtt = async () => {
   publishDiscovery();
 
   onEvent(publishEvent);
+
+  console.log('MQTT connected');
 };
