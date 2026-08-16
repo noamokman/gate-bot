@@ -1,7 +1,7 @@
 import { dirname, join } from 'node:path';
 import env from 'env-var';
 
-export const botToken = env.get('BOT_TOKEN').required().asString();
+export const botToken = env.get('BOT_TOKEN').asString();
 export const adminUserIds = env.get('ADMIN_USER_IDS').default('').asSet();
 export const gateUrl = env.get('GATE_URL').asString();
 export const mqttUrl = env.get('MQTT_URL').asString();

@@ -4,7 +4,13 @@
   <img src="src/web/assets/logo.png" alt="Gate Bot logo" width="128">
 </p>
 
-This is a Telegram bot and web UI that allows authorized users to open a gate. It uses the Telegraf framework for Telegram bot development and supports both HTTP and MQTT for integration with Home Assistant.
+This project allows authorized users to open a gate. It comes with an optional Telegram bot (built with the Telegraf framework) and an optional web UI, and supports both HTTP and MQTT for integration with Home Assistant.
+
+The Telegram bot and the web UI are independent modules — you can run any combination of them:
+
+- **Telegram only**: set `BOT_TOKEN` and the web is disabled.
+- **Web only**: set `WEB_ENABLED=true` without a `BOT_TOKEN`. Admins get notified through MQTT / Home Assistant and can approve or deny access requests from the web admin panel.
+- **Both**: full setup with Telegram notifications and the web dashboard.
 
 ## Features
 
@@ -68,8 +74,8 @@ services:
    ```
 3. Create a `.env` file in the root directory and set the following environment variables:
 
-- `BOT_TOKEN`: Your Telegram bot token.
-- `ADMIN_USER_IDS`: A comma-separated list of Telegram user IDs of the admins.
+- `BOT_TOKEN`: Your Telegram bot token. Omit it to run without the Telegram bot (web-only mode).
+- `ADMIN_USER_IDS`: A comma-separated list of Telegram user IDs of the admins. Only used when the Telegram bot is enabled.
 - `DB_PATH`: Path to the database JSON file (e.g. `.local.db.json`).
 - `DOOR_CODE`: The door code.
 - `PARKING_INFO`: Parking instructions.
@@ -206,9 +212,12 @@ payload: {
     "name": "John Doe",
     "username": "example_user",
     "requestedAt": "2026-08-15T12:00:00.000Z"
-  }
+  },
+  "url": "https://gate.example.com/admin/pending"
 }
 ```
+
+When the web UI is enabled (`WEB_ENABLED=true`), the payload includes a `url` field pointing to the admin "pending requests" page. This lets Home Assistant send a notification with a link back to the website, where the admin can approve or reject the request — useful when running in web-only mode without a Telegram bot.
 
 **Access request allowed / denied** — published when an admin approves or denies a pending request, including the `request` and the resolving `admin` (name/email for web admins, user ID for Telegram admins).
 
