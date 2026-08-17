@@ -3,6 +3,7 @@
     "dashboard": "Dashboard",
     "admin": "Admin",
     "about": "About",
+    "telegram": "Telegram",
     "logout": "Logout",
     "logoutFailed": "Logout failed. Please try again."
   },
@@ -14,7 +15,8 @@
     "username": "Username",
     "password": "Password",
     "invalidCredentials": "Invalid username or password.",
-    "missingCredentials": "Please enter username and password."
+    "missingCredentials": "Please enter username and password.",
+    "telegram": "Or use the Telegram bot"
   },
   "dashboard": {
     "title": "Dashboard",

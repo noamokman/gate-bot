@@ -3,6 +3,7 @@
     "dashboard": "לוח בקרה",
     "admin": "ניהול",
     "about": "אודות",
+    "telegram": "טלגרם",
     "logout": "התנתק",
     "logoutFailed": "ההתנתקות נכשלה. נסה שוב."
   },
@@ -14,7 +15,8 @@
     "username": "שם משתמש",
     "password": "סיסמה",
     "invalidCredentials": "שם משתמש או סיסמה שגויים.",
-    "missingCredentials": "נא להזין שם משתמש וסיסמה."
+    "missingCredentials": "נא להזין שם משתמש וסיסמה.",
+    "telegram": "או השתמשו בבוט הטלגרם"
   },
   "dashboard": {
     "title": "לוח בקרה",
