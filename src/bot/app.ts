@@ -90,10 +90,10 @@ export const startTelegramBot = async (): Promise<void> => {
     bot.stop('SIGTERM');
   });
 
+  console.log('Telegram bot started');
+
   await bot.launch({}, () => {
     // eslint-disable-next-line unicorn/consistent-destructuring
     setTelegramUsername(bot.botInfo?.username);
   });
-
-  console.log('Telegram bot started');
 };
