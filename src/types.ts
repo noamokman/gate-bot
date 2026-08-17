@@ -73,6 +73,7 @@ export interface TelegramPendingRequest {
   lastName?: string;
   picture?: string;
   requestedAt: string;
+  requestToken?: string;
 }
 
 export interface WebPendingRequest {
