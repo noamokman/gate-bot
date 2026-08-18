@@ -103,19 +103,6 @@ export const addPendingRequest = async (request: PendingRequest) => {
   await db.write();
 };
 
-export const updatePendingRequestPicture = async (sourceUserId: string, picture: string, requestToken: string): Promise<void> => {
-  const request = (db.data.pendingRequests ?? []).find(
-    (r) => r.sourceType === 'telegram' && r.sourceUserId === sourceUserId && 'requestToken' in r && r.requestToken === requestToken,
-  );
-
-  if (!request || !('picture' in request)) {
-    return;
-  }
-
-  request.picture = picture;
-  await db.write();
-};
-
 export const removePendingRequest = async (id: string) => {
   db.data.pendingRequests = (db.data.pendingRequests ?? []).filter((r) => r.id !== id);
   await db.write();
