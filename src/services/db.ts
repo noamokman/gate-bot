@@ -17,6 +17,9 @@ await db.read();
 export const isUserAllowed = (id: string, sourceType: 'telegram' | 'web') =>
   (db.data?.users ?? []).some((u) => u.id === id && u.sourceType === sourceType);
 
+export const getUser = (id: string, sourceType: 'telegram' | 'web'): User | undefined =>
+  (db.data?.users ?? []).find((u) => u.id === id && u.sourceType === sourceType);
+
 export const getUsers = (sourceType?: 'telegram' | 'web') => {
   const all = db.data?.users ?? [];
   return sourceType ? all.filter((u) => u.sourceType === sourceType) : [...all];
