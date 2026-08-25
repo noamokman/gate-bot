@@ -106,7 +106,7 @@ export const addPendingRequest = async (request: PendingRequest) => {
 export const updatePendingRequestPicture = async (id: string, picture: string) => {
   const requests = db.data.pendingRequests ?? [];
   const request = requests.find((r) => r.id === id);
-  if (!request) return;
+  if (!request) {return;}
   request.picture = picture;
   await db.write();
 };
