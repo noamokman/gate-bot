@@ -17,6 +17,9 @@ await db.read();
 export const isUserAllowed = (id: string, sourceType: 'telegram' | 'web') =>
   (db.data?.users ?? []).some((u) => u.id === id && u.sourceType === sourceType);
 
+export const getUser = (id: string, sourceType: 'telegram' | 'web'): User | undefined =>
+  (db.data?.users ?? []).find((u) => u.id === id && u.sourceType === sourceType);
+
 export const getUsers = (sourceType?: 'telegram' | 'web') => {
   const all = db.data?.users ?? [];
   return sourceType ? all.filter((u) => u.sourceType === sourceType) : [...all];
@@ -97,6 +100,14 @@ export const addPendingRequest = async (request: PendingRequest) => {
     (r) => !(r.sourceType === request.sourceType && r.sourceUserId === request.sourceUserId),
   );
   db.data.pendingRequests.push(request);
+  await db.write();
+};
+
+export const updatePendingRequestPicture = async (id: string, picture: string) => {
+  const requests = db.data.pendingRequests ?? [];
+  const request = requests.find((r) => r.id === id);
+  if (!request) {return;}
+  request.picture = picture;
   await db.write();
 };
 
