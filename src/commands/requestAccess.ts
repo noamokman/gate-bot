@@ -1,7 +1,7 @@
 import type { Telegraf, Telegram } from 'telegraf';
 import { authorize } from '../services/authorize.js';
 import { alreadyAllowed, requestSent } from '../services/messages.js';
-import { addPendingRequest, getUser } from '../services/db.js';
+import { addPendingRequest, getUser, updatePendingRequestPicture } from '../services/db.js';
 import { sendMessage } from '../services/telegram.js';
 import { publish } from '../services/events.js';
 import { getTelegramProfilePhoto } from '../services/telegramPhoto.js';
@@ -12,7 +12,7 @@ const refreshPendingPicture = async (telegram: Telegram, userId: string, fromId:
     const picture = await getTelegramProfilePhoto(telegram, fromId);
 
     if (picture) {
-      await addPendingRequest({ id: `telegram:${userId}`, sourceType: 'telegram', sourceUserId: userId, picture, requestedAt: new Date().toISOString() });
+      await updatePendingRequestPicture(`telegram:${userId}`, picture);
     }
   } catch (error: unknown) {
     console.error('Failed to refresh pending request picture', error);
