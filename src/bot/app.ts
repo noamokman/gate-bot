@@ -79,9 +79,17 @@ export const startTelegramBot = async (): Promise<void> => {
     commands.push({ command: 'web', description: 'Open the web UI' });
   }
 
-  await telegram.setMyCommands(commands);
+  try {
+    await telegram.setMyCommands(commands);
+  } catch (error) {
+    console.error('Failed to set bot commands:', error);
+  }
 
-  await setBotPhotoIfMissing(telegram, me);
+  try {
+    await setBotPhotoIfMissing(telegram, me);
+  } catch (error) {
+    console.error('Failed to set bot photo:', error);
+  }
 
   process.once('SIGINT', () => {
     bot.stop('SIGINT');
