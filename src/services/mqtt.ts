@@ -18,7 +18,7 @@ const eventTypes = {
   accessRequestDenied: 'access_request_denied',
 } as const;
 
-let client: MqttClient;
+let client: MqttClient | undefined;
 
 const publishDiscovery = () => {
   if (!client || !mqttDiscoveryTopic || !mqttCommandTopic) {
@@ -45,7 +45,12 @@ const publishDiscovery = () => {
 };
 
 const publishEvent = async (event: GateBotEvent) => {
-  if (!client || !mqttCommandTopic) {
+  if (!mqttCommandTopic) {
+    return;
+  }
+
+  if (!client) {
+    console.error(`MQTT not connected, dropping event ${event.type}`);
     return;
   }
 
@@ -108,17 +113,41 @@ const publishEvent = async (event: GateBotEvent) => {
   await client.publishAsync(mqttCommandTopic, JSON.stringify(payload));
 };
 
-export const initMqtt = async () => {
+const attachConnectionLogging = (connection: MqttClient): void => {
+  connection.on('connect', () => {
+    publishDiscovery();
+  });
+
+  connection.on('reconnect', () => {
+    console.log('MQTT reconnecting');
+  });
+
+  connection.on('close', () => {
+    console.log('MQTT connection closed');
+  });
+
+  connection.on('offline', () => {
+    console.log('MQTT offline');
+  });
+
+  connection.on('error', (error) => {
+    console.error('MQTT error:', error);
+  });
+};
+
+export const initMqtt = async (): Promise<void> => {
   if (!mqttUrl) {
     console.log('MQTT skipped: MQTT_URL not set');
     return;
   }
 
+  onEvent(publishEvent);
+
   client = await mqtt.connectAsync(mqttUrl);
 
-  publishDiscovery();
+  attachConnectionLogging(client);
 
-  onEvent(publishEvent);
+  publishDiscovery();
 
   console.log('MQTT connected');
 };
