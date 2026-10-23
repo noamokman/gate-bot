@@ -11,6 +11,7 @@ import { adminRouter } from './routes/admin.js';
 import { apiRouter } from './routes/api.js';
 import { ensureAuth, ensureAdmin } from './middleware.js';
 import { detectLocale, t } from './locales/index.js';
+import { registerHealthCheck } from './health.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const FileStore = sessionFileStore(session);
@@ -30,14 +31,6 @@ export const startWebServer = async () => {
   app.set('views', viewsDir);
 
   app.use('/assets', express.static(join(import.meta.dirname, 'assets')));
-
-  // Registered before the session and locale middleware on purpose: the probe
-  // sends no cookies and the locale middleware writes req.session.locale, which
-  // marks an otherwise-uninitialized session as modified. Express then persists
-  // one session file per probe (30s interval, 30-day TTL) for no reason.
-  app.get('/healthz', (_req, res) => {
-    res.status(200).json({ status: 'ok', version: process.env.BUILD_VERSION ?? '0.0.0' });
-  });
 
   app.use(express.urlencoded({ extended: true }));
 
@@ -84,6 +77,8 @@ export const startWebServer = async () => {
   const server = app.listen(webPort, () => {
     console.log(`Web server started on port ${webPort}`);
   });
+
+  registerHealthCheck(server);
 
   server.on('error', (error) => {
     console.error(`Web server failed on port ${webPort}:`, error);
