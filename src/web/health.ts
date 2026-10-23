@@ -1,7 +1,6 @@
 import type { Server } from 'node:http';
 import { createTerminus } from '@godaddy/terminus';
-import { buildVersion } from '../framework/environment.js';
-import { healthCheckPath } from '../framework/health.js';
+import { buildVersion, healthCheckPath } from '../framework/environment.js';
 
 export const registerHealthCheck = (server: Server) => {
   createTerminus(server, {

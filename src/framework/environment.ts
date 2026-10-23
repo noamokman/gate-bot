@@ -55,9 +55,12 @@ export interface WebConfig {
   webPort: number;
   webBaseUrl: string;
   webSessionPath: string;
+  healthCheckHost: string;
+  healthCheckTimeoutMs: number;
 }
 
 const webEnabled = env.get('WEB_ENABLED').default('false').asBool();
+const webPort = env.get('WEB_PORT').default('3000').asPortNumber();
 
 export const webConfig: WebConfig | undefined = webEnabled
   ? {
@@ -65,11 +68,15 @@ export const webConfig: WebConfig | undefined = webEnabled
       googleClientSecret: env.get('GOOGLE_CLIENT_SECRET').required().asString(),
       webSessionSecret: env.get('WEB_SESSION_SECRET').required().asString(),
       googleAdminEmails: env.get('GOOGLE_ADMIN_EMAILS').default('').asSet(),
-      webPort: env.get('WEB_PORT').default('3000').asPortNumber(),
+      webPort,
       webBaseUrl: env.get('WEB_BASE_URL').required().asString(),
       webSessionPath: env
         .get('WEB_SESSION_PATH')
         .default(join(dirname(dbPath), 'sessions'))
         .asString(),
+      healthCheckHost: env.get('HEALTHCHECK_HOST').default('127.0.0.1').asString(),
+      healthCheckTimeoutMs: env.get('HEALTHCHECK_TIMEOUT_MS').default('2000').asIntPositive(),
     }
   : undefined;
+
+export const healthCheckPath = '/healthz';

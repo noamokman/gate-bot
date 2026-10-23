@@ -1,8 +1,14 @@
 import 'dotenv/config.js';
 import { request } from 'node:http';
-import { healthCheckConfig, healthCheckPath } from './framework/health.js';
+import { healthCheckPath, webConfig } from './framework/environment.js';
 
-const { host, port, timeoutMs } = healthCheckConfig;
+if (!webConfig) {
+  console.log('Web server disabled, nothing to probe');
+
+  process.exit(0);
+}
+
+const { webPort: port, healthCheckHost: host, healthCheckTimeoutMs: timeoutMs } = webConfig;
 
 const probe = request({ host, port, path: healthCheckPath, timeout: timeoutMs }, (response) => {
   response.resume();
