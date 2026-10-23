@@ -31,6 +31,14 @@ export const startWebServer = async () => {
 
   app.use('/assets', express.static(join(import.meta.dirname, 'assets')));
 
+  // Registered before the session and locale middleware on purpose: the probe
+  // sends no cookies and the locale middleware writes req.session.locale, which
+  // marks an otherwise-uninitialized session as modified. Express then persists
+  // one session file per probe (30s interval, 30-day TTL) for no reason.
+  app.get('/healthz', (_req, res) => {
+    res.status(200).json({ status: 'ok', version: process.env.BUILD_VERSION ?? '0.0.0' });
+  });
+
   app.use(express.urlencoded({ extended: true }));
 
   app.use(
@@ -68,10 +76,6 @@ export const startWebServer = async () => {
   app.use('/', dashboardRouter);
   app.use('/', aboutRouter);
   app.use('/admin', ensureAuth, ensureAdmin, adminRouter);
-
-  app.get('/healthz', (_req, res) => {
-    res.status(200).json({ status: 'ok', version: process.env.BUILD_VERSION ?? '0.0.0' });
-  });
 
   app.use((_req, res) => {
     res.redirect('/');
