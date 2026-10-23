@@ -69,6 +69,10 @@ export const startWebServer = async () => {
   app.use('/', aboutRouter);
   app.use('/admin', ensureAuth, ensureAdmin, adminRouter);
 
+  app.get('/healthz', (_req, res) => {
+    res.status(200).json({ status: 'ok', version: process.env.BUILD_VERSION ?? '0.0.0' });
+  });
+
   app.use((_req, res) => {
     res.redirect('/');
   });
