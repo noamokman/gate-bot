@@ -60,7 +60,6 @@ export interface WebConfig {
 }
 
 const webEnabled = env.get('WEB_ENABLED').default('false').asBool();
-const webPort = env.get('WEB_PORT').default('3000').asPortNumber();
 
 export const webConfig: WebConfig | undefined = webEnabled
   ? {
@@ -68,7 +67,7 @@ export const webConfig: WebConfig | undefined = webEnabled
       googleClientSecret: env.get('GOOGLE_CLIENT_SECRET').required().asString(),
       webSessionSecret: env.get('WEB_SESSION_SECRET').required().asString(),
       googleAdminEmails: env.get('GOOGLE_ADMIN_EMAILS').default('').asSet(),
-      webPort,
+      webPort: env.get('WEB_PORT').default('3000').asPortNumber(),
       webBaseUrl: env.get('WEB_BASE_URL').required().asString(),
       webSessionPath: env
         .get('WEB_SESSION_PATH')
