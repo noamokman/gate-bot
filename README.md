@@ -97,6 +97,9 @@ services:
   - `WEB_BASE_URL`: The public URL of the web server (e.g. `https://gate.example.com` or `http://localhost:3000`).
   - `GOOGLE_ADMIN_EMAILS`: A comma-separated list of email addresses that have admin access on the web UI.
   - `BASIC_AUTH_USERS`: Optional. A semicolon-separated list of username,password,isAdmin tuples for password-based login (e.g. `admin,secret,true;user,pass,false`). **Not recommended for production** — intended for testing and local development only.
+  - `HEALTHCHECK_PATH`: Optional. Path the container health check probes (default `/healthz`).
+  - `HEALTHCHECK_HOST`: Optional. Host the container health check connects to (default `127.0.0.1`).
+  - `HEALTHCHECK_TIMEOUT_MS`: Optional. Health check timeout in milliseconds (default `2000`).
 
 4. Run the bot:
    ```sh

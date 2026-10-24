@@ -11,6 +11,7 @@ import { adminRouter } from './routes/admin.js';
 import { apiRouter } from './routes/api.js';
 import { ensureAuth, ensureAdmin } from './middleware.js';
 import { detectLocale, t } from './locales/index.js';
+import { registerHealthCheck } from './health.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const FileStore = sessionFileStore(session);
@@ -76,6 +77,8 @@ export const startWebServer = async () => {
   const server = app.listen(webPort, () => {
     console.log(`Web server started on port ${webPort}`);
   });
+
+  registerHealthCheck(server, webConfig);
 
   server.on('error', (error) => {
     console.error(`Web server failed on port ${webPort}:`, error);

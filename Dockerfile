@@ -20,4 +20,7 @@ ARG BUILD_VERSION=0.0.0
 ENV NODE_ENV=production
 ENV BUILD_VERSION=$BUILD_VERSION
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD [ "node", "dist/healthcheck.js" ]
+
 CMD [ "node", "dist/index.js" ]
