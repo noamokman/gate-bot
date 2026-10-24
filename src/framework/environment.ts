@@ -55,6 +55,7 @@ export interface WebConfig {
   webPort: number;
   webBaseUrl: string;
   webSessionPath: string;
+  healthCheckPath: string;
   healthCheckHost: string;
   healthCheckTimeoutMs: number;
 }
@@ -73,9 +74,8 @@ export const webConfig: WebConfig | undefined = webEnabled
         .get('WEB_SESSION_PATH')
         .default(join(dirname(dbPath), 'sessions'))
         .asString(),
+      healthCheckPath: env.get('HEALTHCHECK_PATH').default('/healthz').asString(),
       healthCheckHost: env.get('HEALTHCHECK_HOST').default('127.0.0.1').asString(),
       healthCheckTimeoutMs: env.get('HEALTHCHECK_TIMEOUT_MS').default('2000').asIntPositive(),
     }
   : undefined;
-
-export const healthCheckPath = '/healthz';

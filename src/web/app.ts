@@ -78,7 +78,7 @@ export const startWebServer = async () => {
     console.log(`Web server started on port ${webPort}`);
   });
 
-  registerHealthCheck(server);
+  registerHealthCheck(server, webConfig);
 
   server.on('error', (error) => {
     console.error(`Web server failed on port ${webPort}:`, error);
