@@ -15,6 +15,11 @@ const db = new Low(adapter, { users: [] });
 
 await db.read();
 
+if ((db.data.activityLog ?? []).length > activityLogLimit) {
+  db.data.activityLog = db.data.activityLog?.slice(0, activityLogLimit);
+  await db.write();
+}
+
 export const isUserAllowed = (id: string, sourceType: 'telegram' | 'web') =>
   (db.data?.users ?? []).some((u) => u.id === id && u.sourceType === sourceType);
 

@@ -31,14 +31,15 @@ const resolveAdminActor = (admin: AdminInfo | undefined): ActivityActor => {
   const webUser = findWebUserByEmail(admin?.email);
   const telegramUser = findTelegramUser(admin?.userId);
   const stored = webUser ?? telegramUser;
+  const isWeb = Boolean(webUser) || admin?.id !== undefined || Boolean(admin?.email);
 
   return {
-    id: admin?.userId ?? admin?.email ?? 'unknown',
+    id: admin?.userId ?? admin?.id ?? admin?.email ?? 'unknown',
     name: admin?.name ?? stored?.name,
     email: admin?.email ?? webUser?.email,
     username: telegramUser?.username,
-    picture: stored?.picture,
-    sourceType: webUser ? 'web' : telegramUser ? 'telegram' : undefined,
+    picture: admin?.picture ?? stored?.picture,
+    sourceType: admin?.userId ? 'telegram' : isWeb ? 'web' : undefined,
   };
 };
 

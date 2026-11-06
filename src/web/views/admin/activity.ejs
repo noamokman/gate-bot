@@ -22,7 +22,7 @@
                 <%= t('activity.' + entry.action) %>
                 <% if (entry.target) { %>: <strong><%= entry.target %></strong><% } %>
               </td>
-              <td><%= entry.timestamp.replace('T', ' ').replace(/\..+/, '') %></td>
+              <td><%= entry.timestamp.replace('T', ' ').replace(/\.\d+Z$/, '') %> UTC</td>
             </tr>
           <% }) %>
         </tbody>

@@ -4,6 +4,8 @@ export interface AdminInfo {
   name?: string;
   email?: string;
   userId?: string;
+  id?: string;
+  picture?: string;
 }
 
 export interface TelegramMessageRef {

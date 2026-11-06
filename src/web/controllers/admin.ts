@@ -1,6 +1,18 @@
 import type { Request, Response } from 'express';
 import { addUser, removeUser as removeDbUser, getUsers, getPendingRequests, removePendingRequest, getActivity, getUser } from '../../services/db.js';
+import type { AdminInfo } from '../../services/events.js';
 import { publish } from '../../services/events.js';
+
+const buildAdminInfo = (req: Request): AdminInfo => {
+  const user = req.session.user!;
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    picture: user.provider === 'google' ? user.picture : undefined,
+  };
+};
 
 export const adminDashboard = (req: Request, res: Response): void => {
   const pendingCount = getPendingRequests().length;
@@ -29,9 +41,6 @@ export const allowRequest = async (req: Request, res: Response): Promise<void> =
     return;
   }
 
-  const adminName = req.session.user!.name;
-  const adminEmail = req.session.user!.email;
-
   await addUser(
     request.sourceType === 'telegram'
       ? {
@@ -57,7 +66,7 @@ export const allowRequest = async (req: Request, res: Response): Promise<void> =
   await publish({
     type: 'access_request_allowed',
     request,
-    admin: { name: adminName, email: adminEmail },
+    admin: buildAdminInfo(req),
   });
 
   await removePendingRequest(id);
@@ -75,13 +84,10 @@ export const denyRequest = async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
-  const adminName = req.session.user!.name;
-  const adminEmail = req.session.user!.email;
-
   await publish({
     type: 'access_request_denied',
     request,
-    admin: { name: adminName, email: adminEmail },
+    admin: buildAdminInfo(req),
   });
 
   await removePendingRequest(id);
@@ -118,8 +124,19 @@ export const adminUsers = (req: Request, res: Response): void => {
 };
 
 export const removeUser = async (req: Request, res: Response): Promise<void> => {
-  const { sourceType, id } = req.params as { sourceType: 'telegram' | 'web'; id: string };
+  const { sourceType, id } = req.params as { sourceType: string; id: string };
+
+  if (sourceType !== 'telegram' && sourceType !== 'web') {
+    res.status(400).json({ ok: false, message: 'Invalid source type' });
+    return;
+  }
+
   const user = getUser(id, sourceType);
+
+  if (!user) {
+    res.status(404).json({ ok: false, message: 'User not found' });
+    return;
+  }
 
   await removeDbUser(id, sourceType);
 
@@ -127,9 +144,9 @@ export const removeUser = async (req: Request, res: Response): Promise<void> => 
     type: 'user_removed',
     userId: id,
     sourceType,
-    name: user?.name,
-    picture: user?.picture,
-    admin: { name: req.session.user!.name, email: req.session.user!.email },
+    name: user.name,
+    picture: user.picture,
+    admin: buildAdminInfo(req),
   });
 
   res.json({ ok: true });
