@@ -11,7 +11,6 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/noamokman/gate-bot" alt="License"></a>
   <a href="https://hub.docker.com/r/noamokman/gate-bot"><img src="https://img.shields.io/docker/pulls/noamokman/gate-bot" alt="Docker pulls"></a>
-  <a href="https://hub.docker.com/r/noamokman/gate-bot"><img src="https://img.shields.io/docker/image-size/noamokman/gate-bot/latest" alt="Docker image size"></a>
   <a href="https://github.com/noamokman/gate-bot/actions/workflows/lint.yml"><img src="https://github.com/noamokman/gate-bot/actions/workflows/lint.yml/badge.svg" alt="Lint"></a>
 </p>
 
