@@ -17,6 +17,7 @@ import { denyAction } from '../actions/deny.js';
 import { versionCommand } from '../commands/version.js';
 import { userInfoCommand } from '../commands/userInfo.js';
 import { webCommand } from '../commands/web.js';
+import { activityCommand } from '../commands/activity.js';
 
 const helpHandler = (ctx: Context) => {
   if (!ctx.chat) {
@@ -60,6 +61,7 @@ export const startTelegramBot = async (): Promise<void> => {
   openCommand(bot);
   versionCommand(bot);
   userInfoCommand(bot);
+  activityCommand(bot);
   if (isWebEnabled) {
     webCommand(bot);
   }
@@ -72,6 +74,7 @@ export const startTelegramBot = async (): Promise<void> => {
     { command: 'check_authorization', description: 'Check if you are allowed to open the gate' },
     { command: 'request_access', description: 'Request access to open the gate' },
     { command: 'info', description: 'View property info (door code, parking, floor, unit, notes)' },
+    { command: 'activity', description: 'View the activity log (admins only)' },
     { command: 'version', description: 'Show the current version' },
   ];
 

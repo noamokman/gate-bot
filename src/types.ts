@@ -88,3 +88,28 @@ export interface WebPendingRequest {
 }
 
 export type PendingRequest = TelegramPendingRequest | WebPendingRequest;
+
+export type ActivityAction =
+  | 'gate_opened'
+  | 'gate_open_failed'
+  | 'access_requested'
+  | 'access_allowed'
+  | 'access_denied'
+  | 'user_removed';
+
+export interface ActivityActor {
+  id: string;
+  name?: string;
+  username?: string;
+  email?: string;
+  picture?: string;
+  sourceType?: 'telegram' | 'web';
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  action: ActivityAction;
+  timestamp: string;
+  actor: ActivityActor;
+  target?: string;
+}

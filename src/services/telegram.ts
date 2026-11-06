@@ -96,6 +96,9 @@ const handleEvent = async (event: GateBotEvent): Promise<void> => {
     case 'gate_open_failed': {
       break;
     }
+    case 'user_removed': {
+      break;
+    }
     case 'access_request_created': {
       await sendAccessRequestToAdmins(event.request);
       break;

@@ -16,6 +16,7 @@ const eventTypes = {
   accessRequestCreated: 'access_request_created',
   accessRequestAllowed: 'access_request_allowed',
   accessRequestDenied: 'access_request_denied',
+  userRemoved: 'user_removed',
 } as const;
 
 let client: MqttClient | undefined;
@@ -104,6 +105,17 @@ const publishEvent = async (event: GateBotEvent) => {
         event_type: eventTypes.accessRequestDenied,
         source,
         request: event.request,
+        admin: event.admin,
+      };
+      break;
+    }
+    case 'user_removed': {
+      payload = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        event_type: eventTypes.userRemoved,
+        source,
+        userId: event.userId,
+        sourceType: event.sourceType,
         admin: event.admin,
       };
       break;

@@ -2,6 +2,7 @@ import type { Telegraf } from 'telegraf';
 import { addUser, getPendingRequests, removePendingRequest } from '../services/db.js';
 import { isAdmin } from '../services/authorize.js';
 import { answerCallbackQuery, sendMessage } from '../services/telegram.js';
+import { adminOnly } from '../services/messages.js';
 import { publish } from '../services/events.js';
 
 export const allowAction = (bot: Telegraf) => {
@@ -15,7 +16,7 @@ export const allowAction = (bot: Telegraf) => {
     const issuingUserId = ctx.from?.id.toString();
 
     if (!issuingUserId || !isAdmin(issuingUserId)) {
-      return sendMessage(chatId, 'You are not allowed to do this');
+      return sendMessage(chatId, adminOnly);
     }
 
     const requestId = ctx.match?.[1];

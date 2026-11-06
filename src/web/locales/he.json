@@ -59,6 +59,20 @@
     "deny": "דחה",
     "remove": "הסר",
     "unknown": "לא ידוע",
-    "back": "חזרה לניהול"
+    "back": "חזרה לניהול",
+    "manageActivity": "יומן פעילות"
+  },
+  "activity": {
+    "title": "יומן פעילות",
+    "user": "משתמש",
+    "action": "פעולה",
+    "time": "זמן",
+    "noActivity": "אין פעילות עדיין.",
+    "gate_opened": "פתח את השער",
+    "gate_open_failed": "הפתיחה נכשלה",
+    "access_requested": "ביקש גישה",
+    "access_allowed": "אישר גישה",
+    "access_denied": "דחה גישה",
+    "user_removed": "הסיר גישה"
   }
 }

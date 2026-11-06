@@ -59,6 +59,20 @@
     "deny": "Deny",
     "remove": "Remove",
     "unknown": "Unknown",
-    "back": "Back to Admin"
+    "back": "Back to Admin",
+    "manageActivity": "Activity Log"
+  },
+  "activity": {
+    "title": "Activity Log",
+    "user": "User",
+    "action": "Action",
+    "time": "Time",
+    "noActivity": "No activity yet.",
+    "gate_opened": "Opened the gate",
+    "gate_open_failed": "Failed to open the gate",
+    "access_requested": "Requested access",
+    "access_allowed": "Allowed access",
+    "access_denied": "Denied access",
+    "user_removed": "Removed access"
   }
 }
