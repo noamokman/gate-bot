@@ -18,3 +18,5 @@ export const requestSent = 'Request sent!📨';
 export const accessDenied = 'Your access to this bot has been denied⛔🙅🏻';
 
 export const infoHeading = 'Property Info 📋';
+
+export const adminOnly = 'You are not allowed to do this';

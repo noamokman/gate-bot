@@ -26,6 +26,14 @@ export type GateBotEvent =
       request: PendingRequest;
       admin?: AdminInfo;
       messageRef?: TelegramMessageRef;
+    }
+  | {
+      type: 'user_removed';
+      userId: string;
+      sourceType: 'telegram' | 'web';
+      name?: string;
+      picture?: string;
+      admin?: AdminInfo;
     };
 
 type Listener = (event: GateBotEvent) => void | Promise<void>;

@@ -14,6 +14,7 @@ export const floor = env.get('FLOOR').asString();
 export const unit = env.get('UNIT').asString();
 export const propertyNotes = env.get('PROPERTY_NOTES').asString();
 export const buildVersion = env.get('BUILD_VERSION').default('0.0.0').asString();
+export const activityLogLimit = env.get('ACTIVITY_LOG_LIMIT').default('100').asIntPositive();
 export const logoPath = join(import.meta.dirname, '..', 'web', 'assets', 'logo.png');
 export const logoJpgPath = join(import.meta.dirname, '..', 'web', 'assets', 'logo.jpg');
 

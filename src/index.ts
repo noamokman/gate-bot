@@ -1,7 +1,10 @@
 import 'dotenv/config.js';
 import { startTelegramBot } from './bot/app.js';
+import { initActivityLog } from './services/activityLog.js';
 import { initMqtt } from './services/mqtt.js';
 import { startWebServer } from './web/app.js';
+
+initActivityLog();
 
 const services: [string, Promise<unknown>][] = [
   ['web', startWebServer()],

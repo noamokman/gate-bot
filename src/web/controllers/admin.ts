@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { addUser, removeUser as removeDbUser, getUsers, getPendingRequests, removePendingRequest } from '../../services/db.js';
+import { addUser, removeUser as removeDbUser, getUsers, getPendingRequests, removePendingRequest, getActivity, getUser } from '../../services/db.js';
 import { publish } from '../../services/events.js';
 
 export const adminDashboard = (req: Request, res: Response): void => {
@@ -118,9 +118,23 @@ export const adminUsers = (req: Request, res: Response): void => {
 };
 
 export const removeUser = async (req: Request, res: Response): Promise<void> => {
-  const { sourceType, id } = req.params as { sourceType: string; id: string };
+  const { sourceType, id } = req.params as { sourceType: 'telegram' | 'web'; id: string };
+  const user = getUser(id, sourceType);
 
-  await removeDbUser(id, sourceType as 'telegram' | 'web');
+  await removeDbUser(id, sourceType);
+
+  await publish({
+    type: 'user_removed',
+    userId: id,
+    sourceType,
+    name: user?.name,
+    picture: user?.picture,
+    admin: { name: req.session.user!.name, email: req.session.user!.email },
+  });
 
   res.json({ ok: true });
+};
+
+export const adminActivity = (req: Request, res: Response): void => {
+  res.render('admin/activity', { user: req.session.user, entries: getActivity() });
 };

@@ -1,12 +1,13 @@
 import { Low } from 'lowdb';
 // eslint-disable-next-line import-x/extensions
 import { JSONFile } from 'lowdb/node';
-import type { PendingRequest, User } from '../types.js';
-import { dbPath } from '../framework/environment.js';
+import type { ActivityLogEntry, PendingRequest, User } from '../types.js';
+import { activityLogLimit, dbPath } from '../framework/environment.js';
 
 interface Schema {
   users?: User[];
   pendingRequests?: PendingRequest[];
+  activityLog?: ActivityLogEntry[];
 }
 
 const adapter = new JSONFile<Schema>(dbPath);
@@ -117,3 +118,10 @@ export const removePendingRequest = async (id: string) => {
 };
 
 export const getPendingRequests = () => [...(db.data.pendingRequests ?? [])];
+
+export const addActivity = async (entry: ActivityLogEntry) => {
+  db.data.activityLog = [entry, ...(db.data.activityLog ?? [])].slice(0, activityLogLimit);
+  await db.write();
+};
+
+export const getActivity = () => [...(db.data.activityLog ?? [])];

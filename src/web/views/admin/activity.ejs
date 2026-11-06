@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+  <div class="card">
+    <h1><%= t('activity.title') %></h1>
+    <% if (entries.length === 0) { %>
+      <p><%= t('activity.noActivity') %></p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th><%= t('activity.user') %></th>
+            <th><%= t('activity.action') %></th>
+            <th><%= t('activity.time') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% entries.forEach(function(entry) { %>
+            <tr>
+              <td><% if (entry.actor.picture) { %><img src="<%= entry.actor.picture %>" alt="" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"><% } %></td>
+              <td><%= entry.actor.name || entry.actor.username || entry.actor.email || entry.actor.id %></td>
+              <td>
+                <%= t('activity.' + entry.action) %>
+                <% if (entry.target) { %>: <strong><%= entry.target %></strong><% } %>
+              </td>
+              <td><%= entry.timestamp.replace('T', ' ').replace(/\..+/, '') %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+  <a href="/admin">&larr; <%= t('admin.back') %></a>
+<%- include('../partials/footer') %>

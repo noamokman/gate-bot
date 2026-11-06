@@ -20,6 +20,7 @@ The Telegram bot and the web UI are independent modules — you can run any comb
 - **Check Authorization**: Users can check if they are authorized to open the gate by sending the `/check_authorization` command.
 - **Get the Door Code**: Authorized users can get the door code by sending the `/door_code` command.
 - **Property Info**: View property details (door code, parking instructions, floor, unit) set via environment variables, accessible through the `/info` Telegram command or the web dashboard.
+- **Activity Log**: Admins can review recent activity (gate openings, access requests, approvals, denials and removals) with the acting user's picture, via the `/activity` Telegram command or the web admin panel. Capped at `ACTIVITY_LOG_LIMIT` entries (default `100`).
 - **Supports Two Modes**:
   - **HTTP Mode**: Calls an HTTP endpoint to open the gate.
   - **MQTT Mode**: Uses MQTT to communicate with Home Assistant.
@@ -77,6 +78,7 @@ services:
 - `BOT_TOKEN`: Your Telegram bot token. Omit it to run without the Telegram bot (web-only mode).
 - `ADMIN_USER_IDS`: A comma-separated list of Telegram user IDs of the admins. Only used when the Telegram bot is enabled.
 - `DB_PATH`: Path to the database JSON file (e.g. `.local.db.json`).
+- `ACTIVITY_LOG_LIMIT`: Optional. Maximum number of activity log entries to keep (default `100`). The oldest entries are dropped first.
 - `DOOR_CODE`: The door code.
 - `PARKING_INFO`: Parking instructions.
 - `FLOOR`: Floor number.
@@ -118,6 +120,7 @@ services:
 | `/request_access`      | Request access to open the gate                             |
 | `/open`                | Open the gate                                               |
 | `/info`                | View property info (door code, parking, floor, unit, notes) |
+| `/activity`            | View the activity log (admins only)                         |
 | `/web`                 | Link to the web UI (only when the web UI is configured)     |
 
 ### Web UI
@@ -134,6 +137,7 @@ When the Telegram bot is enabled, its handle (fetched dynamically from the Teleg
 | Admin Panel       | `/admin`                             | Users with email in `GOOGLE_ADMIN_EMAILS`           |
 | Pending Requests  | `/admin/pending`                     | Admins                                              |
 | Manage Users      | `/admin/users`                       | Admins                                              |
+| Activity Log      | `/admin/activity`                    | Admins                                              |
 
 **Flow for web users:**
 
@@ -226,6 +230,12 @@ payload: {
 When the web UI is enabled (`WEB_ENABLED=true`), the payload includes a `url` field pointing to the admin "pending requests" page. This lets Home Assistant send a notification with a link back to the website, where the admin can approve or reject the request — useful when running in web-only mode without a Telegram bot.
 
 **Access request allowed / denied** — published when an admin approves or denies a pending request, including the `request` and the resolving `admin` (name/email for web admins, user ID for Telegram admins).
+
+**User removed** — published when an admin removes a user's access from the web admin panel, including the `userId`, `sourceType` and the resolving `admin`.
+
+### **Activity Log**
+
+Admins can review the most recent activity through the `/activity` Telegram command or the `/admin/activity` web page. Each entry records the acting user (with their picture on the web), the action, the affected user where relevant and a timestamp. Entries are appended as events flow through the event bus and the log is capped at `ACTIVITY_LOG_LIMIT` entries (default `100`), dropping the oldest first.
 
 ### **Event-Driven Architecture**
 
