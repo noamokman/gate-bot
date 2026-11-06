@@ -20,11 +20,13 @@
             <tr>
               <td><% if (r.picture) { %><img src="<%= r.picture %>" alt="" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"><% } %></td>
               <td>
-                <%= r.name || t('admin.unknown') %>
                 <%
-                  const fullName = [r.firstName, r.lastName].filter(Boolean).join(' ');
+                  const normalize = (value) => (value || '').replace(/\s+/g, ' ').trim();
+                  const fullName = [r.firstName, r.lastName].map(normalize).filter(Boolean).join(' ');
+                  const primary = normalize(r.name) || fullName || t('admin.unknown');
                 %>
-                <% if (fullName && fullName !== r.name) { %><br><span style="font-size:0.8rem;color:var(--text-secondary)"><%= fullName %></span><% } %>
+                <%= primary %>
+                <% if (fullName && fullName !== primary) { %><br><span style="font-size:0.8rem;color:var(--text-secondary)"><%= fullName %></span><% } %>
               </td>
               <td><span class="badge badge-<%= r.sourceType %>"><%= r.sourceType %></span></td>
               <td><%= r.email || (r.username ? '@' + r.username : '') || r.sourceUserId %></td>

@@ -22,14 +22,14 @@ Gate Bot lets authorized people open a gate from a Telegram bot or a web dashboa
 
 Telegram and the web UI are independent modules — run either one or both:
 
-- **Telegram only** — set `BOT_TOKEN` and leave the web UI off.
-- **Web only** — set `WEB_ENABLED=true` without a `BOT_TOKEN`. Admins get notified over MQTT / Home Assistant and approve requests from the web admin panel.
+- **Telegram only** — set `BOT_TOKEN` and `ADMIN_USER_IDS` (the accounts that can approve) and leave the web UI off.
+- **Web only** — set `WEB_ENABLED=true` and `GOOGLE_ADMIN_EMAILS` (who can administer) without a `BOT_TOKEN`. Admins approve requests in the web panel, and with MQTT configured the request is also published to Home Assistant so it can notify you.
 - **Both** — the full setup: Telegram notifications plus the web dashboard, with both sources visible in one admin panel.
 
 ## Features
 
 - 🔐 **Authorization** — only approved users can open the gate. Access is tracked per source, so someone can be allowed on Telegram, on the web, or both.
-- 🙋 **Access requests** — anyone can ask for access. Admins receive the request on Telegram with inline **Allow** / **Deny** buttons, or in the web admin panel — always with the requester's name and photo.
+- 🙋 **Access requests** — anyone can ask for access. Admins receive the request on Telegram with inline **Allow** / **Deny** buttons, or in the web admin panel with the requester's name and their photo when one is available.
 - 🔑 **Open the gate** — `/open` on Telegram, or the **Open Gate** button on the dashboard.
 - 📋 **Property info** — door code, parking instructions, floor, unit and notes, shown only to authorized users.
 - 🧾 **Activity log** — every gate opening, failed opening, access request, approval, denial and removal, with who did it, to whom, and when. Admins only.
@@ -37,7 +37,7 @@ Telegram and the web UI are independent modules — run either one or both:
 - 🔗 **Telegram and web linked** — the bot links to the web UI, and the site links back to the bot.
 - 🖥️ **Web UI** — Google sign-in, light/dark theme that follows the system, and English, Russian and Hebrew localizations.
 - 🧩 **Two transports** — call an HTTP endpoint, or publish over MQTT with automatic Home Assistant discovery.
-- 🐳 **Ready to deploy** — a published Docker image with a built-in health check, and a JSON file as the only state (easy to back up).
+- 🐳 **Ready to deploy** — a published Docker image with a built-in health check, and all application state in one JSON file under a single directory, so a backup is a directory copy.
 
 ## Screenshots
 
@@ -86,6 +86,8 @@ services:
     container_name: gate-bot
     environment:
       DB_PATH: /config/db.json
+      # How many activity-log entries to keep
+      ACTIVITY_LOG_LIMIT: ${ACTIVITY_LOG_LIMIT:-100}
       # Telegram bot (omit BOT_TOKEN for web-only mode)
       BOT_TOKEN: ${BOT_TOKEN}
       ADMIN_USER_IDS: ${ADMIN_USER_IDS}
@@ -103,17 +105,22 @@ services:
       PROPERTY_NOTES: ${PROPERTY_NOTES}
       # Web UI (set WEB_ENABLED=true to enable)
       WEB_ENABLED: ${WEB_ENABLED}
+      WEB_PORT: ${WEB_PORT:-3000}
       WEB_BASE_URL: ${WEB_BASE_URL}
       WEB_SESSION_SECRET: ${WEB_SESSION_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_ADMIN_EMAILS: ${GOOGLE_ADMIN_EMAILS}
+    # Publish the web UI locally. Behind a reverse proxy, drop this and
+    # point the proxy at the container instead.
+    ports:
+      - "${WEB_PORT:-3000}:${WEB_PORT:-3000}"
     volumes:
       - ./config/:/config
     restart: unless-stopped
 ```
 
-Point `./config/` at any writable host directory — that's where the database and web sessions live.
+Point `./config/` at any writable host directory — that's where the database and the web session files live, so copying the directory (and keeping the same `WEB_SESSION_SECRET`) preserves both the data and the existing sign-ins. The web server listens on `WEB_PORT` (3000 by default) inside the container, which the mapping above publishes at `http://localhost:3000`.
 
 ### Run locally
 

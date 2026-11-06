@@ -19,11 +19,13 @@
             <tr>
               <td><% if (u.picture) { %><img src="<%= u.picture %>" alt="" style="width:32px;height:32px;border-radius:50%;vertical-align:middle"><% } %></td>
               <td>
-                <%= u.name %>
                 <%
-                  const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ');
+                  const normalize = (value) => (value || '').replace(/\s+/g, ' ').trim();
+                  const fullName = [u.firstName, u.lastName].map(normalize).filter(Boolean).join(' ');
+                  const primary = normalize(u.name) || fullName;
                 %>
-                <% if (fullName && fullName !== u.name) { %><br><span style="font-size:0.8rem;color:var(--text-secondary)"><%= fullName %></span><% } %>
+                <%= primary %>
+                <% if (fullName && fullName !== primary) { %><br><span style="font-size:0.8rem;color:var(--text-secondary)"><%= fullName %></span><% } %>
               </td>
               <td><span class="badge badge-<%= u.sourceType %>"><%= u.sourceType %></span></td>
               <td><%= u.email || u.sourceUserId %></td>
