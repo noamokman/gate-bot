@@ -1,178 +1,240 @@
-# gate-bot
-
 <p align="center">
-  <img src="src/web/assets/logo.png" alt="Gate Bot logo" width="512">
+  <img src="docs/logo.png" alt="Gate Bot" width="280">
 </p>
 
-This project allows authorized users to open a gate. It comes with an optional Telegram bot (built with the Telegraf framework) and an optional web UI, and supports both HTTP and MQTT for integration with Home Assistant.
+<h1 align="center">Gate Bot</h1>
 
-The Telegram bot and the web UI are independent modules — you can run any combination of them:
+<p align="center">
+  <strong>Open your gate from Telegram or the browser — with access requests, approvals, an activity log and Home Assistant integration.</strong>
+</p>
 
-- **Telegram only**: set `BOT_TOKEN` and the web is disabled.
-- **Web only**: set `WEB_ENABLED=true` without a `BOT_TOKEN`. Admins get notified through MQTT / Home Assistant and can approve or deny access requests from the web admin panel.
-- **Both**: full setup with Telegram notifications and the web dashboard.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/noamokman/gate-bot" alt="License"></a>
+  <a href="https://hub.docker.com/r/noamokman/gate-bot"><img src="https://img.shields.io/docker/pulls/noamokman/gate-bot" alt="Docker pulls"></a>
+  <a href="https://github.com/noamokman/gate-bot/actions/workflows/lint.yml"><img src="https://github.com/noamokman/gate-bot/actions/workflows/lint.yml/badge.svg" alt="Lint"></a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Gate Bot web dashboard" width="760">
+</p>
+
+Gate Bot lets authorized people open a gate from a Telegram bot or a web dashboard, and gives admins one place to approve access requests, manage users and review everything that happened. It talks to your gate over HTTP or MQTT, so it drops straight into Home Assistant.
+
+Telegram and the web UI are independent modules — run either one or both:
+
+- **Telegram only** — set `BOT_TOKEN` and `ADMIN_USER_IDS` (the accounts that can approve) and leave the web UI off.
+- **Web only** — set `WEB_ENABLED=true` and `GOOGLE_ADMIN_EMAILS` (who can administer) without a `BOT_TOKEN`. Admins approve requests in the web panel, and with MQTT configured the request is also published to Home Assistant so it can notify you.
+- **Both** — the full setup: Telegram notifications plus the web dashboard, with both sources visible in one admin panel.
 
 ## Features
 
-- **Authorization System**: Only authorized users can open the gate.
-- **Request Access**: Users can request access to open the gate. The request is sent to the admins, who can either allow or deny the request.
-- **Open the Gate**: Authorized users can open the gate via the `/open` command or the web dashboard.
-- **Check Authorization**: Users can check if they are authorized to open the gate by sending the `/check_authorization` command.
-- **Get the Door Code**: Authorized users can get the door code by sending the `/door_code` command.
-- **Property Info**: View property details (door code, parking instructions, floor, unit) set via environment variables, accessible through the `/info` Telegram command or the web dashboard.
-- **Activity Log**: Admins can review recent activity (gate openings, access requests, approvals, denials and removals) with the acting user's picture, via the `/activity` Telegram command or the web admin panel. Capped at `ACTIVITY_LOG_LIMIT` entries (default `100`).
-- **Supports Two Modes**:
-  - **HTTP Mode**: Calls an HTTP endpoint to open the gate.
-  - **MQTT Mode**: Uses MQTT to communicate with Home Assistant.
-- **Web UI**: A built-in web server with Google login for both users and admins.
-  - **User Dashboard**: Open the gate, check status, request access via browser.
-  - **Admin Panel**: Approve/deny access requests and manage users from the web.
-  - Requests from both Telegram and web are visible in a single admin panel.
+- 🔐 **Authorization** — only approved users can open the gate. Access is tracked per source, so someone can be allowed on Telegram, on the web, or both.
+- 🙋 **Access requests** — anyone can ask for access. Admins receive the request on Telegram with inline **Allow** / **Deny** buttons, or in the web admin panel with the requester's name and their photo when one is available.
+- 🔑 **Open the gate** — `/open` on Telegram, or the **Open Gate** button on the dashboard.
+- 📋 **Property info** — door code, parking instructions, floor, unit and notes, shown only to authorized users.
+- 🧾 **Activity log** — every gate opening, failed opening, access request, approval, denial and removal, with who did it, to whom, and when. Admins only.
+- 🕓 **Rolling history** — the log keeps the most recent entries and drops the oldest, capped by `ACTIVITY_LOG_LIMIT`.
+- 🔗 **Telegram and web linked** — the bot links to the web UI, and the site links back to the bot.
+- 🖥️ **Web UI** — Google sign-in, light/dark theme that follows the system, and English, Russian and Hebrew localizations.
+- 🧩 **Two transports** — call an HTTP endpoint, or publish over MQTT with automatic Home Assistant discovery.
+- 🐳 **Ready to deploy** — a published Docker image with a built-in health check, and all application state in one JSON file under a single directory, so a backup is a directory copy.
 
-## Setup
+## Screenshots
+
+| User dashboard | Dark theme |
+| --- | --- |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Dashboard in dark theme](docs/screenshots/dashboard-dark.png) |
+
+| Requesting access | Sign in |
+| --- | --- |
+| ![Requesting access](docs/screenshots/request-access.png) | ![Login](docs/screenshots/login.png) |
+
+| Admin panel | Pending requests |
+| --- | --- |
+| ![Admin panel](docs/screenshots/admin.png) | ![Pending requests](docs/screenshots/admin-pending.png) |
+
+| Allowed users | Activity log |
+| --- | --- |
+| ![Allowed users](docs/screenshots/admin-users.png) | ![Activity log](docs/screenshots/admin-activity.png) |
+
+_Screenshots show mock data._
+
+## How it works
+
+```
+Telegram bot ─┐
+              ├─► event bus ─► Telegram notifications
+Web UI ───────┘             ├─► MQTT / Home Assistant
+                            └─► activity log
+```
+
+Every action raises a domain event (`src/services/events.ts`). The Telegram, MQTT and activity-log listeners subscribe to that bus, which keeps the sources independent: a gate opening triggered from the web notifies the Telegram admins and lands in the activity log without either side knowing about the other.
+
+- **Telegram bot** (`src/bot/`) — Telegraf, commands plus inline Allow/Deny buttons.
+- **Web UI** (`src/web/`) — Express + EJS server-rendered pages, Google OAuth (or password login for local testing), file-backed sessions.
+- **Gate transports** (`src/services/http.ts`, `src/services/mqtt.ts`) — HTTP POST or MQTT with HA discovery.
+- **State** — a single lowdb JSON file at `DB_PATH` (users, pending requests, activity log).
+
+## Quick start
 
 ### Docker Compose
 
 ```yml
-version: '3.8'
-
 services:
   gate-bot:
     image: noamokman/gate-bot
     container_name: gate-bot
     environment:
       DB_PATH: /config/db.json
+      # How many activity-log entries to keep
+      ACTIVITY_LOG_LIMIT: ${ACTIVITY_LOG_LIMIT:-100}
+      # Telegram bot (omit BOT_TOKEN for web-only mode)
       BOT_TOKEN: ${BOT_TOKEN}
       ADMIN_USER_IDS: ${ADMIN_USER_IDS}
-      GATE_URL: ${GATE_URL} # Required for HTTP mode
+      # Gate transport — HTTP mode
+      GATE_URL: ${GATE_URL}
+      # Gate transport — MQTT mode
+      MQTT_URL: ${MQTT_URL}
+      MQTT_COMMAND_TOPIC: ${MQTT_COMMAND_TOPIC}
+      MQTT_DISCOVERY_TOPIC: ${MQTT_DISCOVERY_TOPIC}
+      # Property info
       DOOR_CODE: ${DOOR_CODE}
       PARKING_INFO: ${PARKING_INFO}
       FLOOR: ${FLOOR}
       UNIT: ${UNIT}
       PROPERTY_NOTES: ${PROPERTY_NOTES}
-      MQTT_URL: ${MQTT_URL} # Required for MQTT mode
-      MQTT_COMMAND_TOPIC: ${MQTT_COMMAND_TOPIC} # Required for MQTT mode
-      MQTT_DISCOVERY_TOPIC: ${MQTT_DISCOVERY_TOPIC} # Required for MQTT mode
       # Web UI (set WEB_ENABLED=true to enable)
       WEB_ENABLED: ${WEB_ENABLED}
+      WEB_PORT: ${WEB_PORT:-3000}
+      WEB_BASE_URL: ${WEB_BASE_URL}
+      WEB_SESSION_SECRET: ${WEB_SESSION_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      WEB_SESSION_SECRET: ${WEB_SESSION_SECRET}
-      WEB_BASE_URL: ${WEB_BASE_URL}
       GOOGLE_ADMIN_EMAILS: ${GOOGLE_ADMIN_EMAILS}
-      WEB_PORT: ${WEB_PORT}
+    # Publish the web UI locally. Behind a reverse proxy, drop this and
+    # point the proxy at the container instead.
+    ports:
+      - "${WEB_PORT:-3000}:${WEB_PORT:-3000}"
     volumes:
       - ./config/:/config
     restart: unless-stopped
 ```
 
-### Manual Setup
+Point `./config/` at any writable host directory — that's where the database and the web session files live, so copying the directory (and keeping the same `WEB_SESSION_SECRET`) preserves both the data and the existing sign-ins. The web server listens on `WEB_PORT` (3000 by default) inside the container, which the mapping above publishes at `http://localhost:3000`.
 
-1. Clone the repository.
-2. Install the dependencies:
-   ```sh
-   yarn install
-   ```
-3. Create a `.env` file in the root directory and set the following environment variables:
+### Run locally
 
-- `BOT_TOKEN`: Your Telegram bot token. Omit it to run without the Telegram bot (web-only mode).
-- `ADMIN_USER_IDS`: A comma-separated list of Telegram user IDs of the admins. Only used when the Telegram bot is enabled.
-- `DB_PATH`: Path to the database JSON file (e.g. `.local.db.json`).
-- `ACTIVITY_LOG_LIMIT`: Optional. Maximum number of activity log entries to keep (default `100`). The oldest entries are dropped first.
-- `DOOR_CODE`: The door code.
-- `PARKING_INFO`: Parking instructions.
-- `FLOOR`: Floor number.
-- `UNIT`: Unit / apartment number.
-- `PROPERTY_NOTES`: Any additional property notes.
-- **For HTTP Mode:**
-  - `GATE_URL`: The endpoint that gets called when an authorized user runs `/open`.
-- **For MQTT Mode:**
-  - `MQTT_URL`: The MQTT broker URL.
-  - `MQTT_COMMAND_TOPIC`: The MQTT topic used to send open commands.
-  - `MQTT_DISCOVERY_TOPIC`: The MQTT topic used for Home Assistant discovery.
-- **For the Web UI (all required if `WEB_ENABLED=true`):**
-  - `WEB_ENABLED`: Set to `true` to enable the web server (default `false`).
-  - `GOOGLE_CLIENT_ID`: Your Google OAuth 2.0 client ID.
-  - `GOOGLE_CLIENT_SECRET`: Your Google OAuth 2.0 client secret.
-  - `WEB_SESSION_SECRET`: A random string used to sign session cookies.
-  - `WEB_SESSION_PATH`: Path to the session storage directory (defaults to `<DB_PATH directory>/sessions`).
-  - `WEB_BASE_URL`: The public URL of the web server (e.g. `https://gate.example.com` or `http://localhost:3000`).
-  - `GOOGLE_ADMIN_EMAILS`: A comma-separated list of email addresses that have admin access on the web UI.
-  - `BASIC_AUTH_USERS`: Optional. A semicolon-separated list of username,password,isAdmin tuples for password-based login (e.g. `admin,secret,true;user,pass,false`). **Not recommended for production** — intended for testing and local development only.
-  - `HEALTHCHECK_PATH`: Optional. Path the container health check probes (default `/healthz`).
-  - `HEALTHCHECK_HOST`: Optional. Host the container health check connects to (default `127.0.0.1`).
-  - `HEALTHCHECK_TIMEOUT_MS`: Optional. Health check timeout in milliseconds (default `2000`).
+```sh
+git clone https://github.com/noamokman/gate-bot.git
+cd gate-bot
+yarn install
+```
 
-4. Run the bot:
-   ```sh
-   yarn start
-   ```
+Create a `.env` file in the repository root with the variables you need (see [Configuration](#configuration)), then:
+
+```sh
+yarn start        # nodemon + tsx, reloads on change
+```
+
+or build and run the compiled output:
+
+```sh
+yarn build && node dist/index.js
+```
+
+## Configuration
+
+Everything is configured through environment variables. `DB_PATH` is the only one that is always required; the rest depend on the modules you enable.
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `DB_PATH` | yes | — | Path to the JSON database file (e.g. `/config/db.json`). |
+| `ACTIVITY_LOG_LIMIT` | no | `100` | Maximum number of activity log entries to keep. The oldest are dropped first. |
+| **Telegram bot** | | | |
+| `BOT_TOKEN` | no | — | Telegram bot token. Omit it to run without the Telegram bot. |
+| `ADMIN_USER_IDS` | no | — | Comma-separated Telegram user IDs of the admins. |
+| **Gate transport** | | | |
+| `GATE_URL` | no | — | HTTP endpoint called when an authorized user opens the gate. |
+| `MQTT_URL` | no | — | MQTT broker URL. |
+| `MQTT_COMMAND_TOPIC` | no | — | MQTT topic used to publish gate events. |
+| `MQTT_DISCOVERY_TOPIC` | no | — | MQTT topic used for Home Assistant discovery. |
+| **Property info** | | | |
+| `DOOR_CODE` | no | — | Door code. |
+| `PARKING_INFO` | no | — | Parking instructions. |
+| `FLOOR` | no | — | Floor number. |
+| `UNIT` | no | — | Unit / apartment number. |
+| `PROPERTY_NOTES` | no | — | Any additional property notes. |
+| **Web UI** (all marked ones are required when `WEB_ENABLED=true`) | | | |
+| `WEB_ENABLED` | no | `false` | Enables the web server. |
+| `WEB_BASE_URL` | yes* | — | Public URL of the web server (e.g. `https://gate.example.com`). Also used for the Google OAuth redirect. |
+| `WEB_SESSION_SECRET` | yes* | — | Random string used to sign session cookies. |
+| `GOOGLE_CLIENT_ID` | yes* | — | Google OAuth 2.0 client ID. |
+| `GOOGLE_CLIENT_SECRET` | yes* | — | Google OAuth 2.0 client secret. |
+| `GOOGLE_ADMIN_EMAILS` | no | — | Comma-separated emails that get admin access on the web UI. |
+| `WEB_PORT` | no | `3000` | Port the web server listens on. |
+| `WEB_SESSION_PATH` | no | `<DB_PATH dir>/sessions` | Directory for session files (30-day TTL). |
+| `BASIC_AUTH_USERS` | no | — | Password login for local testing: `user,pass,isAdmin` tuples separated by `;` (e.g. `admin,secret,true;guest,pass,false`). **Not recommended for production.** |
+| `HEALTHCHECK_PATH` | no | `/healthz` | Path the container health check probes. |
+| `HEALTHCHECK_HOST` | no | `127.0.0.1` | Host the health check connects to. |
+| `HEALTHCHECK_TIMEOUT_MS` | no | `2000` | Health check timeout in milliseconds. |
+| **Other** | | | |
+| `BUILD_VERSION` | no | `0.0.0` | Reported by `/version`, the health endpoint and the About page. Set automatically by the Docker build. |
+
+\* Required only when `WEB_ENABLED=true`.
 
 ## Usage
 
-### Telegram Commands
+### Telegram commands
 
-| Command                | Description                                                 |
-| ---------------------- | ----------------------------------------------------------- |
-| `/start`               | Start the bot                                               |
-| `/help`                | Get help on how to use the bot                              |
-| `/check_authorization` | Check if you are allowed to open the gate                   |
-| `/request_access`      | Request access to open the gate                             |
-| `/open`                | Open the gate                                               |
-| `/info`                | View property info (door code, parking, floor, unit, notes) |
-| `/activity`            | View the activity log (admins only)                         |
-| `/web`                 | Link to the web UI (only when the web UI is configured)     |
+| Command | Description |
+| --- | --- |
+| `/start` | Start the bot |
+| `/help` | How to use the bot |
+| `/open` | Open the gate |
+| `/check_authorization` | Check whether you are allowed to open the gate |
+| `/request_access` | Request access to open the gate |
+| `/info` | View property info (door code, parking, floor, unit, notes) |
+| `/activity` | View the activity log (admins only) |
+| `/version` | Show the current version |
+| `/web` | Link to the web UI (only when the web UI is enabled) |
 
 ### Web UI
 
-The web server is started automatically when the Google OAuth environment variables are configured.
+The web server starts when `WEB_ENABLED=true`. When the Telegram bot is also enabled, its handle is fetched from the Telegram API and shown on the login page and in the navigation; the bot links back with `/web`.
 
-When the Telegram bot is enabled, its handle (fetched dynamically from the Telegram API) is shown on the login page and in the site navigation, linking back to the bot. Conversely, when the web UI is configured, the bot exposes a `/web` command that links to the website.
+| Page | URL | Access |
+| --- | --- | --- |
+| Login / Dashboard | `/` | Public for login, authenticated users for the dashboard |
+| Open gate & property info | `/` | Authorized users |
+| About | `/about` | Public |
+| Admin panel | `/admin` | Admins |
+| Pending requests | `/admin/pending` | Admins |
+| Allowed users | `/admin/users` | Admins |
+| Activity log | `/admin/activity` | Admins |
 
-| Feature           | URL                                  | Access                                              |
-| ----------------- | ------------------------------------ | --------------------------------------------------- |
-| Login / Dashboard | `/` (dashboard shown when signed in) | Public for login; authenticated users for dashboard |
-| Open Gate         | `/` (Open Gate button)               | Authorized users                                    |
-| Property Info     | `/` (info card)                      | Authorized users                                    |
-| Admin Panel       | `/admin`                             | Users with email in `GOOGLE_ADMIN_EMAILS`           |
-| Pending Requests  | `/admin/pending`                     | Admins                                              |
-| Manage Users      | `/admin/users`                       | Admins                                              |
-| Activity Log      | `/admin/activity`                    | Admins                                              |
+**Requesting access:** sign in with Google, click **Request Access**, and wait for an admin to approve you — on Telegram or in the web admin panel. The request appears in both. Web access requests are only supported for Google accounts.
 
-**Flow for web users:**
+**Admins** can approve or deny requests with one click, manage the list of allowed users, and review the activity log. On the web, admin rights come from `GOOGLE_ADMIN_EMAILS`; on Telegram, from `ADMIN_USER_IDS`.
 
-1. Visit the site and sign in with Google.
-2. If not yet authorized, click "Request Access".
-3. An admin (via Telegram or the web admin panel) approves the request.
-4. The user can now open the gate from the dashboard.
+## Home Assistant integration
 
-**Admin panel features:**
+With MQTT configured, the bot publishes a retained discovery message so Home Assistant picks it up as an event entity — no manual configuration needed.
 
-- View pending access requests from both Telegram and web users.
-- Approve or deny requests with one click.
-- View all authorized users and remove them if needed.
-
-## MQTT Integration
-
-### **Home Assistant Discovery**
-
-The bot automatically publishes an MQTT discovery message so Home Assistant can detect it as an event. The discovery topic is set in the environment variable `MQTT_DISCOVERY_TOPIC`.
-
-Example MQTT discovery topic:
-
-```
-homeassistant/event/gate_bot_event/config
-```
-
-Example payload sent to Home Assistant:
+Discovery topic (example): `homeassistant/event/gate_bot_event/config`
 
 ```json
 {
   "name": "Gate Bot Event",
   "unique_id": "gate_bot_event",
-  "event_types": ["gate_bot_triggered", "gate_open_failed", "access_request_created", "access_request_allowed", "access_request_denied"],
+  "event_types": [
+    "gate_bot_triggered",
+    "gate_open_failed",
+    "access_request_created",
+    "access_request_allowed",
+    "access_request_denied",
+    "user_removed"
+  ],
   "state_topic": "home/gate_bot/event",
-  "value_template": "{{ value_json.event_type }}",
   "json_attributes_topic": "home/gate_bot/event",
   "device": {
     "identifiers": ["gate_bot"],
@@ -183,15 +245,12 @@ Example payload sent to Home Assistant:
 }
 ```
 
-### **Publishing MQTT Events**
+Events are published to `MQTT_COMMAND_TOPIC`, each with an `event_type`, the `source` (`gate_bot`) and an event-specific payload.
 
-The bot publishes domain events to the MQTT command topic defined by `MQTT_COMMAND_TOPIC`. All events include an `event_type`, `source` (`gate_bot`), and event-specific payload.
+**Gate opened** — an authorized user opened the gate:
 
-**Gate opened** — published when an authorized user opens the gate:
-
-```
-topic: home/gate_bot/event
-payload: {
+```json
+{
   "event_type": "gate_bot_triggered",
   "source": "gate_bot",
   "action": "open_gate",
@@ -205,14 +264,14 @@ payload: {
 }
 ```
 
-The `userInfo.sourceType` field indicates where the open request originated — `"telegram"` for the Telegram bot or `"web"` for the web dashboard. This allows Home Assistant to trigger the gate opening automatically.
+`userInfo.sourceType` is `telegram` or `web`, so automations can tell where the request came from.
 
-**Gate open failed** — published when opening the gate fails, with an `error` field describing the failure.
+**Gate open failed** — opening failed; the payload carries an `error` field.
 
-**Access request created** — published when a user requests access (via Telegram or web):
+**Access request created** — someone requested access:
 
 ```json
-payload: {
+{
   "event_type": "access_request_created",
   "source": "gate_bot",
   "request": {
@@ -227,16 +286,46 @@ payload: {
 }
 ```
 
-When the web UI is enabled (`WEB_ENABLED=true`), the payload includes a `url` field pointing to the admin "pending requests" page. This lets Home Assistant send a notification with a link back to the website, where the admin can approve or reject the request — useful when running in web-only mode without a Telegram bot.
+The `url` field is included when the web UI is enabled, so a notification can link straight to the page where an admin approves or denies the request — handy in web-only mode without a Telegram bot.
 
-**Access request allowed / denied** — published when an admin approves or denies a pending request, including the `request` and the resolving `admin` (name/email for web admins, user ID for Telegram admins).
+**Access request allowed / denied** — an admin approved or denied a request; includes the `request` and the resolving `admin` (name and email for web admins, user ID for Telegram admins).
 
-**User removed** — published when an admin removes a user's access from the web admin panel, including the `userId`, `sourceType` and the resolving `admin`.
+**User removed** — an admin removed a user's access; includes `userId`, `sourceType` and the resolving `admin`.
 
-### **Activity Log**
+## Development
 
-Admins can review the most recent activity through the `/activity` Telegram command or the `/admin/activity` web page. Each entry records the acting user (with their picture on the web), the action, the affected user where relevant and a timestamp. Entries are appended as events flow through the event bus and the log is capped at `ACTIVITY_LOG_LIMIT` entries (default `100`), dropping the oldest first.
+```sh
+yarn install
+yarn start        # dev server with reload
+yarn lint:base    # eslint (the CI gate)
+yarn build        # tsc -> dist/, plus views/locales/assets
+```
 
-### **Event-Driven Architecture**
+Requirements: Node.js 24+ and yarn.
 
-All outbound notifications go through an internal event bus (`src/services/events.ts`). Telegram messages are sent exclusively by the Telegram listener in `src/services/telegram.ts`, and MQTT publishes are handled by the MQTT listener in `src/services/mqtt.ts`. This makes it easy to add new consumers (e.g. additional Telegram chats, logging, or home automation triggers) by subscribing to events.
+**Project layout**
+
+```
+src/
+  actions/       inline button handlers (allow / deny)
+  bot/           Telegram bot wiring
+  commands/      Telegram commands
+  framework/     environment/config
+  services/      db, events, gate transports, activity log
+  web/           Express app, routes, controllers, views, locales
+  index.ts       starts the web server, Telegram bot and MQTT
+```
+
+**Adding a listener** — subscribe to the event bus instead of calling Telegram or MQTT directly:
+
+```ts
+onEvent(async (event) => {
+  if (event.type === 'gate_opened') {
+    // ...
+  }
+});
+```
+
+## License
+
+[MIT](LICENSE)
