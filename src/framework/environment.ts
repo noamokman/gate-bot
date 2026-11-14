@@ -1,5 +1,35 @@
 import { dirname, join } from 'node:path';
 import env from 'env-var';
+import type { Locale } from '../web/locales/index.js';
+
+export interface LocalizedText {
+  base: string | undefined;
+  byLocale: Partial<Record<Locale, string>>;
+}
+
+// Env var suffix per locale. A Record<Locale, string> keeps this in step with supportedLocales in
+// src/web/locales/index.ts: adding a locale there fails the build until it is added here.
+const localeEnvSuffixes: Record<Locale, string> = { en: 'EN', he: 'HE', ru: 'RU' };
+
+// A base English value plus optional per-locale overrides (`<NAME>_HE`, `<NAME>_RU`, ...). A locale
+// with no override falls back to the base value, so a deployment only configures the languages it
+// cares about.
+const readLocalizedText = (name: string): LocalizedText => {
+  const byLocale: Partial<Record<Locale, string>> = {};
+
+  for (const [locale, suffix] of Object.entries(localeEnvSuffixes) as [Locale, string][]) {
+    const value = env.get(`${name}_${suffix}`).asString();
+
+    if (value) {
+      byLocale[locale] = value;
+    }
+  }
+
+  return { base: env.get(name).asString(), byLocale };
+};
+
+export const resolveLocalizedText = (text: LocalizedText, locale: string): string | undefined =>
+  text.byLocale[locale as Locale] ?? text.base;
 
 export const botToken = env.get('BOT_TOKEN').asString();
 export const adminUserIds = env.get('ADMIN_USER_IDS').default('').asSet();
@@ -9,10 +39,13 @@ export const mqttCommandTopic = env.get('MQTT_COMMAND_TOPIC').asString();
 export const mqttDiscoveryTopic = env.get('MQTT_DISCOVERY_TOPIC').asString();
 export const dbPath = env.get('DB_PATH').required().asString();
 export const doorCode = env.get('DOOR_CODE').asString();
-export const parkingInfo = env.get('PARKING_INFO').asString();
-export const floor = env.get('FLOOR').asString();
-export const unit = env.get('UNIT').asString();
-export const propertyNotes = env.get('PROPERTY_NOTES').asString();
+export const propertyAddress = readLocalizedText('PROPERTY_ADDRESS');
+export const parkingInfo = readLocalizedText('PARKING_INFO');
+export const floor = readLocalizedText('FLOOR');
+export const unit = readLocalizedText('UNIT');
+export const propertyNotes = readLocalizedText('PROPERTY_NOTES');
+export const propertyPlaceId = env.get('PROPERTY_PLACE_ID').asString();
+export const propertyCoordinates = env.get('PROPERTY_COORDINATES').asString();
 export const buildVersion = env.get('BUILD_VERSION').default('0.0.0').asString();
 export const activityLogLimit = env.get('ACTIVITY_LOG_LIMIT').default('100').asIntPositive();
 export const logoPath = join(import.meta.dirname, '..', 'web', 'assets', 'logo.png');

@@ -2,17 +2,33 @@ import type { Request, Response } from 'express';
 import { open } from '../../services/open.js';
 import { webBaseUrl } from '../../services/system.js';
 import { isUserAllowed, addPendingRequest } from '../../services/db.js';
-import { doorCode, parkingInfo, floor, unit, propertyNotes, basicAuthUsers } from '../../framework/environment.js';
+import {
+  doorCode,
+  parkingInfo,
+  floor,
+  unit,
+  propertyNotes,
+  propertyAddress,
+  basicAuthUsers,
+  resolveLocalizedText,
+} from '../../framework/environment.js';
 import { failedToOpen, opening, requestSent, alreadyAllowed } from '../../services/messages.js';
+import { buildMapLinks } from '../../services/mapLinks.js';
 import { publish } from '../../services/events.js';
 
-const buildPropertyInfo = (allowed: boolean) => ({
-  doorCode: allowed && doorCode ? doorCode : null,
-  parkingInfo: allowed && parkingInfo ? parkingInfo : null,
-  floor: allowed && floor ? floor : null,
-  unit: allowed && unit ? unit : null,
-  propertyNotes: allowed && propertyNotes ? propertyNotes : null,
-});
+const buildPropertyInfo = (allowed: boolean, locale: string) => {
+  const address = allowed ? resolveLocalizedText(propertyAddress, locale) : undefined;
+
+  return {
+    doorCode: allowed && doorCode ? doorCode : null,
+    address: address ?? null,
+    parkingInfo: allowed ? (resolveLocalizedText(parkingInfo, locale) ?? null) : null,
+    floor: allowed ? (resolveLocalizedText(floor, locale) ?? null) : null,
+    unit: allowed ? (resolveLocalizedText(unit, locale) ?? null) : null,
+    propertyNotes: allowed ? (resolveLocalizedText(propertyNotes, locale) ?? null) : null,
+    ...(allowed ? buildMapLinks(address) : { googleMapsUrl: undefined, wazeUrl: undefined }),
+  };
+};
 
 export const dashboardPage = (req: Request, res: Response): void => {
   const { user } = req.session;
@@ -23,12 +39,13 @@ export const dashboardPage = (req: Request, res: Response): void => {
   }
 
   const allowed = user.isAdmin || isUserAllowed(user.id, 'web');
+  const locale = req.session.locale ?? 'en';
 
   res.render('dashboard', {
     user,
     isAllowed: allowed,
     webUrl: webBaseUrl ?? '',
-    ...buildPropertyInfo(allowed),
+    ...buildPropertyInfo(allowed, locale),
     message: null,
   });
 };
