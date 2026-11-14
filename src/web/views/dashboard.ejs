@@ -58,11 +58,18 @@
       var messageEl = document.getElementById('shareMessage');
       if (!buttons.length || !messageEl) return;
       var messageTimer;
+      var restoreTimer;
 
+      // A live region does not re-announce unchanged text, so clear it and set the new text in a
+      // later task: two consecutive identical results (web link, then Telegram link) both announce.
       function showMessage(ok, text) {
-        messageEl.className = 'message ' + (ok ? 'message-success' : 'message-error');
-        messageEl.textContent = text || '';
         clearTimeout(messageTimer);
+        clearTimeout(restoreTimer);
+        messageEl.textContent = '';
+        messageEl.className = 'message ' + (ok ? 'message-success' : 'message-error');
+        restoreTimer = setTimeout(function() {
+          messageEl.textContent = text || '';
+        }, 0);
         messageTimer = setTimeout(function() {
           messageEl.className = 'message sr-only';
           messageEl.textContent = '';

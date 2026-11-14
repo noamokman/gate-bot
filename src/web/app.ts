@@ -74,9 +74,11 @@ export const startWebServer = async () => {
     res.redirect('/');
   });
 
-  const server = app.listen(webPort, webHost, () => {
-    console.log(`Web server started on ${webHost}:${webPort}`);
-  });
+  const onListening = () => {
+    console.log(`Web server started on ${webHost ?? 'all interfaces'}:${webPort}`);
+  };
+
+  const server = webHost ? app.listen(webPort, webHost, onListening) : app.listen(webPort, onListening);
 
   registerHealthCheck(server, webConfig);
 

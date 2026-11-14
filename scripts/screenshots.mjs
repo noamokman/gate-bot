@@ -278,10 +278,9 @@ const bundledChromium = () => {
 const pinFonts = async () => {
   const fontDirs = [
     join(root, 'scripts', 'fonts'),
-    join(process.env.HOME ?? '', '.fonts'),
     '/usr/share/fonts/truetype/noto',
     '/usr/share/fonts/noto',
-  ].filter((dir) => dir && dir !== join('', '.fonts'));
+  ];
 
   const fontconfig = join(workDir, 'fonts.conf');
   await mkdir(join(workDir, 'fontcache'), { recursive: true });
