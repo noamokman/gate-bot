@@ -31,7 +31,7 @@ Telegram and the web UI are independent modules — run either one or both:
 - 🔐 **Authorization** — only approved users can open the gate. Access is tracked per source, so someone can be allowed on Telegram, on the web, or both.
 - 🙋 **Access requests** — anyone can ask for access. Admins receive the request on Telegram with inline **Allow** / **Deny** buttons, or in the web admin panel with the requester's name and their photo when one is available.
 - 🔑 **Open the gate** — `/open` on Telegram, or the **Open Gate** button on the dashboard.
-- 📋 **Property info** — door code, parking instructions, floor, unit and notes, shown only to authorized users.
+- 📋 **Property info** — address with Google Maps/Waze links, door code, parking instructions, floor, unit and notes, shown only to authorized users.
 - 🧾 **Activity log** — every gate opening, failed opening, access request, approval, denial and removal, with who did it, to whom, and when. Admins only.
 - 🕓 **Rolling history** — the log keeps the most recent entries and drops the oldest, capped by `ACTIVITY_LOG_LIMIT`.
 - 🔗 **Telegram and web linked** — the bot links to the web UI, and the site links back to the bot.
@@ -173,7 +173,7 @@ Everything is configured through environment variables. `DB_PATH` is the only on
 | `MQTT_COMMAND_TOPIC` | no | — | MQTT topic used to publish gate events. |
 | `MQTT_DISCOVERY_TOPIC` | no | — | MQTT topic used for Home Assistant discovery. |
 | **Property info** | | | |
-| `PROPERTY_ADDRESS` | no | — | Property address. Shown on the dashboard with "Open in Google Maps" / "Open in Waze" buttons. |
+| `PROPERTY_ADDRESS` | no | — | Property address. Shown on the dashboard with "Open in Google Maps" / "Open in Waze" buttons, and in the Telegram `/info` command with the raw Maps and Waze links. |
 | `PROPERTY_PLACE_ID` | no | — | Google Maps place id, appended to the Google Maps link so it opens the exact place. |
 | `PROPERTY_COORDINATES` | no | — | `lat,lng` used by the Waze link. Waze has no place-id parameter, so coordinates are what make it land on the right destination. |
 | `DOOR_CODE` | no | — | Door code. |
@@ -217,7 +217,7 @@ Compose reads `.env` for interpolation only; it does not inject every variable i
 | `/open` | Open the gate |
 | `/check_authorization` | Check whether you are allowed to open the gate |
 | `/request_access` | Request access to open the gate |
-| `/info` | View property info (door code, parking, floor, unit, notes) |
+| `/info` | View property info (address with Maps/Waze links, door code, parking, floor, unit, notes) |
 | `/activity` | View the activity log (admins only) |
 | `/version` | Show the current version |
 | `/web` | Link to the web UI (only when the web UI is enabled) |

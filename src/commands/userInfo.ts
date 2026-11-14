@@ -2,6 +2,7 @@ import type { Telegraf } from 'telegraf';
 import { authorize } from '../services/authorize.js';
 import {
   doorCode,
+  propertyAddress,
   parkingInfo,
   floor,
   unit,
@@ -9,22 +10,28 @@ import {
   resolveLocalizedText,
 } from '../framework/environment.js';
 import { detectLocale } from '../web/locales/index.js';
+import { buildMapLinks } from '../services/mapLinks.js';
 import { infoHeading, notAllowed } from '../services/messages.js';
 import { sendMessage } from '../services/telegram.js';
 
-const buildInfo = (locale: string): string => {
+export const buildInfo = (locale: string): string => {
   const parking = resolveLocalizedText(parkingInfo, locale);
   const floorText = resolveLocalizedText(floor, locale);
   const unitText = resolveLocalizedText(unit, locale);
   const notes = resolveLocalizedText(propertyNotes, locale);
+  const address = resolveLocalizedText(propertyAddress, locale);
+  const { googleMapsUrl, wazeUrl } = buildMapLinks(address);
 
   const lines: string[] = [
     infoHeading,
+    ...(address ? [`Address 📍: ${address}`] : []),
     ...(doorCode ? [`Door Code 🔢: ${doorCode}`] : []),
     ...(parking ? [`Parking 🅿️: ${parking}`] : []),
     ...(floorText ? [`Floor: ${floorText}`] : []),
     ...(unitText ? [`Unit: ${unitText}`] : []),
     ...(notes ? [`Notes 📝: ${notes}`] : []),
+    ...(googleMapsUrl ? [`Google Maps 🗺️: ${googleMapsUrl}`] : []),
+    ...(wazeUrl ? [`Waze 🚗: ${wazeUrl}`] : []),
   ];
 
   return lines.length > 1 ? lines.join('\n') : 'No property info set.';
