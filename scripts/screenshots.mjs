@@ -421,6 +421,13 @@ const main = async () => {
   // real gate.
   delete process.env.GATE_URL;
 
+  // Property text resolves a locale-specific variant over the base value, so an inherited
+  // `_EN`/`_HE`/`_RU` override would win over the demo values below and both change the
+  // rendered pages and leak a real address into the committed screenshots.
+  for (const name of ['PROPERTY_ADDRESS', 'PARKING_INFO', 'FLOOR', 'UNIT', 'PROPERTY_NOTES']) {
+    for (const suffix of ['EN', 'HE', 'RU']) delete process.env[`${name}_${suffix}`];
+  }
+
   Object.assign(process.env, {
     TZ: 'UTC',
     NODE_ENV: 'production',
