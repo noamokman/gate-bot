@@ -37,6 +37,12 @@ const update = !check;
 const outIndex = args.indexOf('--out');
 const outDir = outIndex === -1 ? (update ? docsDir : join(workDir, 'rendered')) : resolve(args[outIndex + 1]);
 
+// In check mode the output must never be the baseline directory: writing there would replace
+// the committed image before compare() reads it, so every page would report "match".
+if (check && outDir === docsDir) {
+  throw new Error('--check must not write into docs/screenshots — use `yarn screenshots` to update the baselines.');
+}
+
 const avatar = (label, background) =>
   `data:image/svg+xml;base64,${Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">` +
@@ -411,12 +417,20 @@ const main = async () => {
 
   await writeFile(join(workDir, 'db.json'), JSON.stringify(db, null, 2));
 
+  // Never inherit the real gate transport or unrelated auth/limit values: they change the
+  // rendered pages (password form, trimmed activity fixtures) and would leak requests to a
+  // real gate.
+  delete process.env.GATE_URL;
+
   Object.assign(process.env, {
     TZ: 'UTC',
     NODE_ENV: 'production',
     WEB_ENABLED: 'true',
+    WEB_HOST: '127.0.0.1',
     WEB_PORT: String(port),
     WEB_BASE_URL: origin,
+    BASIC_AUTH_USERS: '',
+    ACTIVITY_LOG_LIMIT: '100',
     WEB_SESSION_SECRET: sessionSecret,
     WEB_SESSION_PATH: sessionsDir,
     DB_PATH: join(workDir, 'db.json'),

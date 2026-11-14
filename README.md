@@ -172,6 +172,7 @@ Everything is configured through environment variables. `DB_PATH` is the only on
 | `GOOGLE_CLIENT_SECRET` | yes* | — | Google OAuth 2.0 client secret. |
 | `GOOGLE_ADMIN_EMAILS` | no | — | Comma-separated emails that get admin access on the web UI. |
 | `WEB_PORT` | no | `3000` | Port the web server listens on. |
+| `WEB_HOST` | no | `0.0.0.0` | Interface the web server binds to. Set `127.0.0.1` to restrict access to loopback. |
 | `WEB_SESSION_PATH` | no | `<DB_PATH dir>/sessions` | Directory for session files (30-day TTL). |
 | `BASIC_AUTH_USERS` | no | — | Password login for local testing: `user,pass,isAdmin` tuples separated by `;` (e.g. `admin,secret,true;guest,pass,false`). **Not recommended for production.** |
 | `HEALTHCHECK_PATH` | no | `/healthz` | Path the container health check probes. |
