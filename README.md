@@ -204,7 +204,7 @@ Everything is configured through environment variables. `DB_PATH` is the only on
 
 Every property text setting (`PROPERTY_ADDRESS`, `PARKING_INFO`, `FLOOR`, `UNIT`, `PROPERTY_NOTES`) also accepts a per-locale override by appending the uppercase language code: `PROPERTY_ADDRESS_HE`, `PROPERTY_ADDRESS_RU`, `PARKING_INFO_HE`, and so on. The base value is the fallback, so you only need to configure the languages you want to translate — a locale without an override shows the base (English) text. The web UI resolves the text with the language the visitor selected; the Telegram `/info` command uses the Telegram client's language.
 
-Compose reads `.env` for interpolation only; it does not inject every variable into the container. Each override you set in `.env` must also be listed in the service's `environment:` mapping — the commented lines in the Compose example above are there to copy out. Running the container directly (`docker run`) or with an `env_file:` needs no extra step, since those pass the whole file through.
+Compose reads `.env` for interpolation only; it does not inject every variable into the container. Each override you set in `.env` must also be listed in the service's `environment:` mapping — the commented lines in the Compose example above are there to copy out. Running the container directly needs no extra step as long as you pass the file: `docker run --env-file .env …`. The same goes for a Compose `env_file:` entry — both hand the whole file to the container, so every override in it is already forwarded.
 
 ## Usage
 
