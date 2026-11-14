@@ -21,16 +21,27 @@
     <% } %>
   </div>
 
-  <% if (isAllowed && (doorCode || parkingInfo || floor || unit || propertyNotes)) { %>
+  <% if (isAllowed && (address || doorCode || parkingInfo || floor || unit || propertyNotes)) { %>
     <div class="card">
       <h1><%= t('dashboard.propertyInfo') %></h1>
       <table>
+        <% if (address) { %><tr><td><strong><%= t('dashboard.address') %></strong></td><td><%= address %></td></tr><% } %>
         <% if (doorCode) { %><tr><td><strong><%= t('dashboard.doorCode') %></strong></td><td><%= doorCode %></td></tr><% } %>
         <% if (parkingInfo) { %><tr><td><strong><%= t('dashboard.infoParking') %></strong></td><td><%= parkingInfo %></td></tr><% } %>
         <% if (floor) { %><tr><td><strong><%= t('dashboard.infoFloor') %></strong></td><td><%= floor %></td></tr><% } %>
         <% if (unit) { %><tr><td><strong><%= t('dashboard.infoUnit') %></strong></td><td><%= unit %></td></tr><% } %>
         <% if (propertyNotes) { %><tr><td><strong><%= t('dashboard.infoNotes') %></strong></td><td style="white-space: pre-wrap;"><%= propertyNotes %></td></tr><% } %>
       </table>
+      <% if (googleMapsUrl || wazeUrl) { %>
+        <div class="map-actions">
+          <% if (googleMapsUrl) { %>
+            <a class="btn" id="googleMapsBtn" href="<%= googleMapsUrl %>" target="_blank" rel="noopener noreferrer"><%= t('dashboard.openInGoogleMaps') %></a>
+          <% } %>
+          <% if (wazeUrl) { %>
+            <a class="btn" id="wazeBtn" href="<%= wazeUrl %>" target="_blank" rel="noopener noreferrer"><%= t('dashboard.openInWaze') %></a>
+          <% } %>
+        </div>
+      <% } %>
     </div>
   <% } %>
 

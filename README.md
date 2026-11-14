@@ -98,11 +98,25 @@ services:
       MQTT_COMMAND_TOPIC: ${MQTT_COMMAND_TOPIC}
       MQTT_DISCOVERY_TOPIC: ${MQTT_DISCOVERY_TOPIC}
       # Property info
+      PROPERTY_ADDRESS: ${PROPERTY_ADDRESS}
+      PROPERTY_PLACE_ID: ${PROPERTY_PLACE_ID}
+      PROPERTY_COORDINATES: ${PROPERTY_COORDINATES}
       DOOR_CODE: ${DOOR_CODE}
       PARKING_INFO: ${PARKING_INFO}
       FLOOR: ${FLOOR}
       UNIT: ${UNIT}
       PROPERTY_NOTES: ${PROPERTY_NOTES}
+      # Per-locale overrides — uncomment the ones you set in .env.
+      # PROPERTY_ADDRESS_HE: ${PROPERTY_ADDRESS_HE}
+      # PROPERTY_ADDRESS_RU: ${PROPERTY_ADDRESS_RU}
+      # PARKING_INFO_HE: ${PARKING_INFO_HE}
+      # PARKING_INFO_RU: ${PARKING_INFO_RU}
+      # FLOOR_HE: ${FLOOR_HE}
+      # FLOOR_RU: ${FLOOR_RU}
+      # UNIT_HE: ${UNIT_HE}
+      # UNIT_RU: ${UNIT_RU}
+      # PROPERTY_NOTES_HE: ${PROPERTY_NOTES_HE}
+      # PROPERTY_NOTES_RU: ${PROPERTY_NOTES_RU}
       # Web UI (set WEB_ENABLED=true to enable)
       WEB_ENABLED: ${WEB_ENABLED}
       WEB_PORT: ${WEB_PORT:-3000}
@@ -159,6 +173,9 @@ Everything is configured through environment variables. `DB_PATH` is the only on
 | `MQTT_COMMAND_TOPIC` | no | — | MQTT topic used to publish gate events. |
 | `MQTT_DISCOVERY_TOPIC` | no | — | MQTT topic used for Home Assistant discovery. |
 | **Property info** | | | |
+| `PROPERTY_ADDRESS` | no | — | Property address. Shown on the dashboard with "Open in Google Maps" / "Open in Waze" buttons. |
+| `PROPERTY_PLACE_ID` | no | — | Google Maps place id, appended to the Google Maps link so it opens the exact place. |
+| `PROPERTY_COORDINATES` | no | — | `lat,lng` used by the Waze link. Waze has no place-id parameter, so coordinates are what make it land on the right destination. |
 | `DOOR_CODE` | no | — | Door code. |
 | `PARKING_INFO` | no | — | Parking instructions. |
 | `FLOOR` | no | — | Floor number. |
@@ -182,6 +199,12 @@ Everything is configured through environment variables. `DB_PATH` is the only on
 | `BUILD_VERSION` | no | `0.0.0` | Reported by `/version`, the health endpoint and the About page. Set automatically by the Docker build. |
 
 \* Required only when `WEB_ENABLED=true`.
+
+### Localized property text
+
+Every property text setting (`PROPERTY_ADDRESS`, `PARKING_INFO`, `FLOOR`, `UNIT`, `PROPERTY_NOTES`) also accepts a per-locale override by appending the uppercase language code: `PROPERTY_ADDRESS_HE`, `PROPERTY_ADDRESS_RU`, `PARKING_INFO_HE`, and so on. The base value is the fallback, so you only need to configure the languages you want to translate — a locale without an override shows the base (English) text. The web UI resolves the text with the language the visitor selected; the Telegram `/info` command uses the Telegram client's language.
+
+Compose reads `.env` for interpolation only; it does not inject every variable into the container. Each override you set in `.env` must also be listed in the service's `environment:` mapping — the commented lines in the Compose example above are there to copy out. Running the container directly needs no extra step as long as you pass the file: `docker run --env-file .env …`. The same goes for a Compose `env_file:` entry — both hand the whole file to the container, so every override in it is already forwarded.
 
 ## Usage
 

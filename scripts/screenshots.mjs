@@ -421,6 +421,13 @@ const main = async () => {
   // real gate.
   delete process.env.GATE_URL;
 
+  // Property text resolves a locale-specific variant over the base value, so an inherited
+  // `_EN`/`_HE`/`_RU` override would win over the demo values below and both change the
+  // rendered pages and leak a real address into the committed screenshots.
+  for (const name of ['PROPERTY_ADDRESS', 'PARKING_INFO', 'FLOOR', 'UNIT', 'PROPERTY_NOTES']) {
+    for (const suffix of ['EN', 'HE', 'RU']) delete process.env[`${name}_${suffix}`];
+  }
+
   Object.assign(process.env, {
     TZ: 'UTC',
     NODE_ENV: 'production',
@@ -436,6 +443,9 @@ const main = async () => {
     GOOGLE_CLIENT_ID: 'screenshots-demo',
     GOOGLE_CLIENT_SECRET: 'screenshots-demo',
     GOOGLE_ADMIN_EMAILS: 'dana.levi@example.com',
+    PROPERTY_ADDRESS: '12 Herzl Street, Tel Aviv',
+    PROPERTY_PLACE_ID: 'ChIJdemo0000000000000000',
+    PROPERTY_COORDINATES: '32.0853,34.7818',
     DOOR_CODE: '4821#',
     PARKING_INFO: 'Level B2 · spots 14–15',
     FLOOR: 'Floor 3',
