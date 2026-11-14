@@ -57,7 +57,7 @@ Telegram and the web UI are independent modules — run either one or both:
 | --- | --- |
 | ![Allowed users](docs/screenshots/admin-users.png) | ![Activity log](docs/screenshots/admin-activity.png) |
 
-_Screenshots show mock data._
+_Screenshots show mock data._ They are generated from a throwaway database by `yarn screenshots` (run `node node_modules/playwright-core/cli.js install chromium` once). CI runs `yarn screenshots:check` and fails when a committed image no longer matches the UI; the workflow attaches the freshly rendered pages (and pixel diffs) as the **screenshots** artifact.
 
 ## How it works
 
@@ -172,10 +172,11 @@ Everything is configured through environment variables. `DB_PATH` is the only on
 | `GOOGLE_CLIENT_SECRET` | yes* | — | Google OAuth 2.0 client secret. |
 | `GOOGLE_ADMIN_EMAILS` | no | — | Comma-separated emails that get admin access on the web UI. |
 | `WEB_PORT` | no | `3000` | Port the web server listens on. |
+| `WEB_HOST` | no | — | Interface the web server binds to. When unset the server listens on all interfaces (the hostless `listen` call, dual-stack); set `127.0.0.1` to restrict access to loopback. |
 | `WEB_SESSION_PATH` | no | `<DB_PATH dir>/sessions` | Directory for session files (30-day TTL). |
 | `BASIC_AUTH_USERS` | no | — | Password login for local testing: `user,pass,isAdmin` tuples separated by `;` (e.g. `admin,secret,true;guest,pass,false`). **Not recommended for production.** |
 | `HEALTHCHECK_PATH` | no | `/healthz` | Path the container health check probes. |
-| `HEALTHCHECK_HOST` | no | `127.0.0.1` | Host the health check connects to. |
+| `HEALTHCHECK_HOST` | no | `127.0.0.1` | Host the health check connects to. It must be an address the server actually bound: with `WEB_HOST` unset (or `0.0.0.0`/`127.0.0.1`) the default works, but a specific `WEB_HOST` such as `::1` or an interface IP needs `HEALTHCHECK_HOST` set to the same address or the container never turns healthy. |
 | `HEALTHCHECK_TIMEOUT_MS` | no | `2000` | Health check timeout in milliseconds. |
 | **Other** | | | |
 | `BUILD_VERSION` | no | `0.0.0` | Reported by `/version`, the health endpoint and the About page. Set automatically by the Docker build. |
@@ -299,9 +300,12 @@ yarn install
 yarn start        # dev server with reload
 yarn lint:base    # eslint (the CI gate)
 yarn build        # tsc -> dist/, plus views/locales/assets
+yarn screenshots  # regenerate docs/screenshots/*.png from mock data
 ```
 
 Requirements: Node.js 24+ and yarn.
+
+**UI changes** — run `yarn screenshots` and commit the updated images; `yarn screenshots:check` (also part of CI) renders the same pages again and pixel-compares them with what is committed. The script seeds invented people and a forged session cookie into `dist/screenshots/`, so it never touches real data and needs no Google login. Set `CHROME_PATH` to use an existing Chrome instead of Playwright's Chromium.
 
 **Project layout**
 
@@ -314,6 +318,8 @@ src/
   services/      db, events, gate transports, activity log
   web/           Express app, routes, controllers, views, locales
   index.ts       starts the web server, Telegram bot and MQTT
+scripts/
+  screenshots.mjs  seeds mock data and renders docs/screenshots/*.png
 ```
 
 **Adding a listener** — subscribe to the event bus instead of calling Telegram or MQTT directly:

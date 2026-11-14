@@ -22,7 +22,7 @@ export const startWebServer = async () => {
     return;
   }
 
-  const { webPort, webSessionSecret, webSessionPath, webBaseUrl } = webConfig;
+  const { webPort, webHost, webSessionSecret, webSessionPath, webBaseUrl } = webConfig;
 
   const app = express();
 
@@ -74,9 +74,11 @@ export const startWebServer = async () => {
     res.redirect('/');
   });
 
-  const server = app.listen(webPort, () => {
-    console.log(`Web server started on port ${webPort}`);
-  });
+  const onListening = () => {
+    console.log(`Web server started on ${webHost ?? 'all interfaces'}:${webPort}`);
+  };
+
+  const server = webHost ? app.listen(webPort, webHost, onListening) : app.listen(webPort, onListening);
 
   registerHealthCheck(server, webConfig);
 

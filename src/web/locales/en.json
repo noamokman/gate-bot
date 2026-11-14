@@ -33,7 +33,15 @@
     "infoParking": "Parking Instructions",
     "infoFloor": "Floor",
     "infoUnit": "Unit / Apartment",
-    "infoNotes": "Notes"
+    "infoNotes": "Notes",
+    "share": "Share",
+    "shareHint": "Invite others to open the gate.",
+    "shareWeb": "Share web app",
+    "shareTelegram": "Share Telegram bot",
+    "shareWebText": "Open the gate with Gate Bot:",
+    "shareTelegramText": "Open the gate with the Gate Bot Telegram bot:",
+    "shareCopied": "Link copied to clipboard.",
+    "shareFailed": "Could not copy the link."
   },
   "about": {
     "title": "About Gate Bot",

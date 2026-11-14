@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { open } from '../../services/open.js';
+import { webBaseUrl } from '../../services/system.js';
 import { isUserAllowed, addPendingRequest } from '../../services/db.js';
 import { doorCode, parkingInfo, floor, unit, propertyNotes, basicAuthUsers } from '../../framework/environment.js';
 import { failedToOpen, opening, requestSent, alreadyAllowed } from '../../services/messages.js';
@@ -26,6 +27,7 @@ export const dashboardPage = (req: Request, res: Response): void => {
   res.render('dashboard', {
     user,
     isAllowed: allowed,
+    webUrl: webBaseUrl ?? '',
     ...buildPropertyInfo(allowed),
     message: null,
   });

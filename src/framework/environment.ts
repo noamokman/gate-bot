@@ -54,6 +54,7 @@ export interface WebConfig {
   webSessionSecret: string;
   googleAdminEmails: Set<string>;
   webPort: number;
+  webHost?: string;
   webBaseUrl: string;
   webSessionPath: string;
   healthCheckPath: string;
@@ -70,6 +71,7 @@ export const webConfig: WebConfig | undefined = webEnabled
       webSessionSecret: env.get('WEB_SESSION_SECRET').required().asString(),
       googleAdminEmails: env.get('GOOGLE_ADMIN_EMAILS').default('').asSet(),
       webPort: env.get('WEB_PORT').default('3000').asPortNumber(),
+      webHost: env.get('WEB_HOST').asString(),
       webBaseUrl: env.get('WEB_BASE_URL').required().asString(),
       webSessionPath: env
         .get('WEB_SESSION_PATH')
