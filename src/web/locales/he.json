@@ -33,7 +33,15 @@
     "infoParking": "הוראות חניה",
     "infoFloor": "קומה",
     "infoUnit": "דירה / מספר",
-    "infoNotes": "הערות"
+    "infoNotes": "הערות",
+    "share": "שיתוף",
+    "shareHint": "הזמינו אחרים לפתוח את השער.",
+    "shareWeb": "שיתוף האתר",
+    "shareTelegram": "שיתוף בוט הטלגרם",
+    "shareWebText": "פתחו את השער עם Gate Bot:",
+    "shareTelegramText": "פתחו את השער עם בוט הטלגרם של Gate Bot:",
+    "shareCopied": "הקישור הועתק ללוח.",
+    "shareFailed": "לא ניתן להעתיק את הקישור."
   },
   "about": {
     "title": "אודות Gate Bot",

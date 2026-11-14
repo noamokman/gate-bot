@@ -33,7 +33,15 @@
     "infoParking": "Парковка",
     "infoFloor": "Этаж",
     "infoUnit": "Квартира / Офис",
-    "infoNotes": "Заметки"
+    "infoNotes": "Заметки",
+    "share": "Поделиться",
+    "shareHint": "Пригласите других открывать ворота.",
+    "shareWeb": "Поделиться сайтом",
+    "shareTelegram": "Поделиться Telegram-ботом",
+    "shareWebText": "Открывайте ворота через Gate Bot:",
+    "shareTelegramText": "Открывайте ворота через Telegram-бота Gate Bot:",
+    "shareCopied": "Ссылка скопирована в буфер обмена.",
+    "shareFailed": "Не удалось скопировать ссылку."
   },
   "about": {
     "title": "О Gate Bot",

@@ -57,7 +57,7 @@ Telegram and the web UI are independent modules — run either one or both:
 | --- | --- |
 | ![Allowed users](docs/screenshots/admin-users.png) | ![Activity log](docs/screenshots/admin-activity.png) |
 
-_Screenshots show mock data._
+_Screenshots show mock data._ They are generated from a throwaway database by `yarn screenshots` (run `node node_modules/playwright-core/cli.js install chromium` once). CI runs `yarn screenshots:check` and fails when a committed image no longer matches the UI; the workflow attaches the freshly rendered pages (and pixel diffs) as the **screenshots** artifact.
 
 ## How it works
 
@@ -299,9 +299,12 @@ yarn install
 yarn start        # dev server with reload
 yarn lint:base    # eslint (the CI gate)
 yarn build        # tsc -> dist/, plus views/locales/assets
+yarn screenshots  # regenerate docs/screenshots/*.png from mock data
 ```
 
 Requirements: Node.js 24+ and yarn.
+
+**UI changes** — run `yarn screenshots` and commit the updated images; `yarn screenshots:check` (also part of CI) renders the same pages again and pixel-compares them with what is committed. The script seeds invented people and a forged session cookie into `dist/screenshots/`, so it never touches real data and needs no Google login. Set `CHROME_PATH` to use an existing Chrome instead of Playwright's Chromium.
 
 **Project layout**
 
@@ -314,6 +317,8 @@ src/
   services/      db, events, gate transports, activity log
   web/           Express app, routes, controllers, views, locales
   index.ts       starts the web server, Telegram bot and MQTT
+scripts/
+  screenshots.mjs  seeds mock data and renders docs/screenshots/*.png
 ```
 
 **Adding a listener** — subscribe to the event bus instead of calling Telegram or MQTT directly:

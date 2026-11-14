@@ -10,7 +10,9 @@
     "lint": "yarn lint:base --fix",
     "lint:base": "eslint .",
     "build": "tsc && rm -rf dist/web/views && cp -r src/web/views dist/web/views && cp src/web/locales/*.json dist/web/locales/ && cp -r src/web/assets dist/web/assets",
-    "start": "nodemon"
+    "start": "nodemon",
+    "screenshots": "yarn build && node scripts/screenshots.mjs --update",
+    "screenshots:check": "yarn build && node scripts/screenshots.mjs --check"
   },
   "keywords": [],
   "author": "Noam Okman <noamokman@gmail.com> (https://github.com/noamokman)",
@@ -41,7 +43,11 @@
     "@types/session-file-store": "^1.2.6",
     "eslint": "^9.21.0",
     "nodemon": "^3.1.9",
+    "pixelmatch": "^8.0.0",
+    "playwright-core": "^1.65.1",
+    "pngjs": "^7.0.0",
     "prettier": "^3.5.1",
+    "sharp": "^0.35.5",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.1"
