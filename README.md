@@ -106,6 +106,17 @@ services:
       FLOOR: ${FLOOR}
       UNIT: ${UNIT}
       PROPERTY_NOTES: ${PROPERTY_NOTES}
+      # Per-locale overrides — uncomment the ones you set in .env.
+      # PROPERTY_ADDRESS_HE: ${PROPERTY_ADDRESS_HE}
+      # PROPERTY_ADDRESS_RU: ${PROPERTY_ADDRESS_RU}
+      # PARKING_INFO_HE: ${PARKING_INFO_HE}
+      # PARKING_INFO_RU: ${PARKING_INFO_RU}
+      # FLOOR_HE: ${FLOOR_HE}
+      # FLOOR_RU: ${FLOOR_RU}
+      # UNIT_HE: ${UNIT_HE}
+      # UNIT_RU: ${UNIT_RU}
+      # PROPERTY_NOTES_HE: ${PROPERTY_NOTES_HE}
+      # PROPERTY_NOTES_RU: ${PROPERTY_NOTES_RU}
       # Web UI (set WEB_ENABLED=true to enable)
       WEB_ENABLED: ${WEB_ENABLED}
       WEB_PORT: ${WEB_PORT:-3000}
@@ -192,6 +203,8 @@ Everything is configured through environment variables. `DB_PATH` is the only on
 ### Localized property text
 
 Every property text setting (`PROPERTY_ADDRESS`, `PARKING_INFO`, `FLOOR`, `UNIT`, `PROPERTY_NOTES`) also accepts a per-locale override by appending the uppercase language code: `PROPERTY_ADDRESS_HE`, `PROPERTY_ADDRESS_RU`, `PARKING_INFO_HE`, and so on. The base value is the fallback, so you only need to configure the languages you want to translate — a locale without an override shows the base (English) text. The web UI resolves the text with the language the visitor selected; the Telegram `/info` command uses the Telegram client's language.
+
+Compose reads `.env` for interpolation only; it does not inject every variable into the container. Each override you set in `.env` must also be listed in the service's `environment:` mapping — the commented lines in the Compose example above are there to copy out. Running the container directly (`docker run`) or with an `env_file:` needs no extra step, since those pass the whole file through.
 
 ## Usage
 
